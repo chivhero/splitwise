@@ -82,13 +82,18 @@ function detectUserLanguage(): Locale {
 }
 
 export function LanguageProvider({ children }: { children: ReactNode }) {
-  const [locale, setLocaleState] = useState<Locale>('en');
+  const [locale, setLocaleState] = useState<Locale>('ru');
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     // Определяем язык при монтировании
-    const detectedLocale = detectUserLanguage();
-    setLocaleState(detectedLocale);
+    try {
+      const detectedLocale = detectUserLanguage();
+      setLocaleState(detectedLocale);
+    } catch (error) {
+      console.error('Error detecting language:', error);
+      setLocaleState('ru'); // Fallback to Russian
+    }
     setMounted(true);
   }, []);
 
