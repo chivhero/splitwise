@@ -51,7 +51,7 @@ function interpolate(template: string, params?: Record<string, any>): string {
 function detectUserLanguage(): Locale {
   // 1. Проверяем Telegram WebApp
   if (typeof window !== 'undefined' && window.Telegram?.WebApp) {
-    const tgLang = window.Telegram.WebApp.initDataUnsafe?.user?.language_code;
+    const tgLang = (window.Telegram.WebApp.initDataUnsafe?.user as any)?.language_code;
     if (tgLang) {
       // Русский язык для ru, be, uk, kk и других стран СНГ
       if (['ru', 'be', 'uk', 'kk', 'ky', 'uz', 'tg', 'az', 'hy', 'ka'].includes(tgLang)) {
