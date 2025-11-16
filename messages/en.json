@@ -107,6 +107,9 @@
     "bannerTitle": "Try Premium!",
     "bannerDescription": "Unlimited groups and expenses for just $2.99/month",
     "activateButton": "Activate Premium",
+    "limitReached": "Group limit reached",
+    "freeLimit": "Free users can create up to 5 groups",
+    "upgradeMessage": "Upgrade to Premium for unlimited groups",
     "features": {
       "unlimitedGroups": "Unlimited groups",
       "unlimitedExpenses": "Unlimited expenses",

@@ -50,7 +50,24 @@ export async function POST(request: NextRequest) {
       user = createUser(Number(telegramId), 'Test User', 'Developer', 'testuser');
     }
 
-    // Лимиты убраны - бесконечное количество групп для всех пользователей!
+    // Проверка лимита групп для бесплатных пользователей
+    if (!user.isPremium) {
+      const userGroups = getUserGroups(user.id);
+      const FREE_GROUPS_LIMIT = 5;
+      
+      if (userGroups.length >= FREE_GROUPS_LIMIT) {
+        return NextResponse.json(
+          { 
+            error: 'Достигнут лимит групп',
+            message: `Бесплатные пользователи могут создать до ${FREE_GROUPS_LIMIT} групп. Оформите Premium для безлимитных групп.`,
+            limit: FREE_GROUPS_LIMIT,
+            current: userGroups.length,
+            needsPremium: true
+          },
+          { status: 403 }
+        );
+      }
+    }
     
     const group = createGroup(name, user.id, description, currency || 'USD');
 

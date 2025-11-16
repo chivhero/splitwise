@@ -107,6 +107,9 @@
     "bannerTitle": "Попробуйте Premium!",
     "bannerDescription": "Безлимитные группы и расходы всего за $2.99/месяц",
     "activateButton": "Активировать Premium",
+    "limitReached": "Достигнут лимит групп",
+    "freeLimit": "Бесплатно можно создать до 5 групп",
+    "upgradeMessage": "Оформите Premium для безлимитных групп",
     "features": {
       "unlimitedGroups": "Неограниченное количество групп",
       "unlimitedExpenses": "Неограниченное количество расходов",
