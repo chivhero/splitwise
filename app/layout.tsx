@@ -3,6 +3,7 @@ import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import TelegramProvider from '@/components/TelegramProvider';
 import { LanguageProvider } from '@/contexts/LanguageContext';
+import ErrorBoundary from '@/components/ErrorBoundary';
 
 const inter = Inter({ subsets: ['latin', 'cyrillic'] });
 
@@ -22,11 +23,13 @@ export default function RootLayout({
         <script src="https://telegram.org/js/telegram-web-app.js"></script>
       </head>
       <body className={inter.className}>
-        <LanguageProvider>
-          <TelegramProvider>
-            {children}
-          </TelegramProvider>
-        </LanguageProvider>
+        <ErrorBoundary>
+          <LanguageProvider>
+            <TelegramProvider>
+              {children}
+            </TelegramProvider>
+          </LanguageProvider>
+        </ErrorBoundary>
       </body>
     </html>
   );
