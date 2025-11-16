@@ -209,7 +209,6 @@ export default function GroupPage() {
       {/* Modals */}
       {showAddExpense && group && telegramId && (
         <AddExpenseModal
-          groupId={groupId}
           group={group}
           telegramId={telegramId}
           onClose={() => setShowAddExpense(false)}
