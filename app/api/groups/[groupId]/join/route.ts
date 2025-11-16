@@ -35,7 +35,7 @@ export async function POST(
     }
 
     // Проверяем, не является ли пользователь уже участником
-    const isAlreadyMember = group.members.some(m => m.userId === user.id);
+    const isAlreadyMember = group.members.some((m: any) => m.userId === user.id);
     if (isAlreadyMember) {
       return NextResponse.json(
         { message: 'Already a member', group },
