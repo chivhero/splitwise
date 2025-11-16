@@ -5,7 +5,7 @@
  * на основе переменной окружения USE_SQLITE или DATABASE_URL
  */
 
-const useSQLite = process.env.USE_SQLITE === 'true' || !process.env.DATABASE_URL;
+const useSQLite = process.env.USE_SQLITE === 'true' || (!process.env.DATABASE_URL && !process.env.POSTGRES_URL);
 
 console.log(`📊 Database mode: ${useSQLite ? 'SQLite (Development)' : 'PostgreSQL (Production)'}`);
 
