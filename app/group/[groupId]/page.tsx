@@ -108,15 +108,15 @@ export default function GroupPage() {
       {/* Header */}
       <div className="bg-gradient-to-r from-purple-600 via-purple-500 to-indigo-600 text-white p-6 rounded-b-3xl shadow-xl">
         <div className="flex items-center gap-3 mb-4">
-          <button
+        <button
             onClick={() => router.push('/')}
             className="p-2 hover:bg-white/10 rounded-lg transition-colors active:scale-95"
-          >
+        >
             <ArrowLeft size={24} />
-          </button>
+        </button>
           <h1 className="text-2xl font-bold flex-1">{group.name}</h1>
         </div>
-        
+
         {group.description && (
           <p className="text-purple-100 text-sm mb-4">{group.description}</p>
         )}
@@ -141,38 +141,38 @@ export default function GroupPage() {
 
       {/* Tabs */}
       <div className="flex gap-2 px-4 mt-4">
-        <button
-          onClick={() => {
-            setActiveTab('expenses');
-            hapticFeedback('light');
-          }}
+          <button
+            onClick={() => {
+              setActiveTab('expenses');
+              hapticFeedback('light');
+            }}
           className={`flex-1 py-3 rounded-lg font-medium transition-all ${
-            activeTab === 'expenses'
+              activeTab === 'expenses'
               ? 'bg-white shadow-lg text-purple-600'
               : 'bg-white/50 text-gray-600 hover:bg-white/80'
-          }`}
-        >
+            }`}
+          >
           <div className="flex items-center justify-center gap-2">
             <TrendingUp size={18} />
             {t('expenses.title')}
           </div>
-        </button>
-        <button
-          onClick={() => {
-            setActiveTab('settlements');
-            hapticFeedback('light');
-          }}
+          </button>
+          <button
+            onClick={() => {
+              setActiveTab('settlements');
+              hapticFeedback('light');
+            }}
           className={`flex-1 py-3 rounded-lg font-medium transition-all ${
-            activeTab === 'settlements'
+              activeTab === 'settlements'
               ? 'bg-white shadow-lg text-purple-600'
               : 'bg-white/50 text-gray-600 hover:bg-white/80'
-          }`}
-        >
+            }`}
+          >
           <div className="flex items-center justify-center gap-2">
             <Users size={18} />
             {t('settlements.title')}
           </div>
-        </button>
+          </button>
       </div>
 
       {/* Content */}

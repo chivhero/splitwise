@@ -54,19 +54,19 @@ export default function PremiumBanner() {
         <div className="bg-white/20 p-2 rounded-lg backdrop-blur-sm">
           <Crown size={24} />
         </div>
-             <div className="flex-1">
+        <div className="flex-1">
                <h3 className="font-bold mb-1">{t('premium.bannerTitle')}</h3>
-               <p className="text-sm text-white/90 mb-3">
+          <p className="text-sm text-white/90 mb-3">
                  {t('premium.bannerDescription')}
-               </p>
-               <button
-                 onClick={handleUpgrade}
-                 disabled={loading}
+          </p>
+          <button
+            onClick={handleUpgrade}
+            disabled={loading}
                  className="bg-white text-purple-600 font-semibold px-4 py-2 rounded-lg text-sm hover:bg-white/90 transition-all shadow-md active:scale-95 disabled:opacity-50"
-               >
+          >
                  {loading ? t('common.loading') : t('premium.activateButton')}
-               </button>
-             </div>
+          </button>
+        </div>
       </div>
 
       {/* Декоративные элементы */}

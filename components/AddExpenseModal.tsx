@@ -243,14 +243,14 @@ export default function AddExpenseModal({ telegramId, group, onClose, onExpenseA
 
         {/* Actions - fixed at bottom */}
         <div className="flex gap-3 p-6 pt-4 border-t border-gray-100 flex-shrink-0">
-          <button
-            type="button"
-            onClick={onClose}
-            className="btn-secondary flex-1"
-            disabled={loading}
-          >
+            <button
+              type="button"
+              onClick={onClose}
+              className="btn-secondary flex-1"
+              disabled={loading}
+            >
             {t('common.cancel')}
-          </button>
+            </button>
           <button 
             type="submit" 
             onClick={(e) => {
@@ -264,8 +264,8 @@ export default function AddExpenseModal({ telegramId, group, onClose, onExpenseA
             disabled={loading}
           >
             {loading ? t('expenses.adding') : t('expenses.add')}
-          </button>
-        </div>
+            </button>
+          </div>
       </div>
     </div>
   );
