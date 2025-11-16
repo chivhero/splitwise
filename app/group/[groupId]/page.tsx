@@ -79,7 +79,7 @@ export default function GroupPage() {
   };
 
   const handleShareLink = () => {
-    shareGroupLink(groupId);
+    shareGroupLink(groupId, group?.name || 'Group');
   };
 
   if (loading) {
