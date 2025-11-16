@@ -16,7 +16,7 @@ export async function GET(
     }
 
     const expenses = getGroupExpenses(params.groupId);
-    const members = group.members.map(m => m.user!);
+    const members = group.members.map((m: any) => m.user!);
     const summary = getGroupSummary(expenses, members);
 
     return NextResponse.json({ summary });
