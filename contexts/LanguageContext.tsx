@@ -49,58 +49,47 @@ function interpolate(template: string, params?: Record<string, any>): string {
 
 // Определение языка пользователя
 function detectUserLanguage(): Locale {
-  // 1. Проверяем Telegram WebApp
-  if (typeof window !== 'undefined' && window.Telegram?.WebApp) {
-    const tgLang = (window.Telegram.WebApp.initDataUnsafe?.user as any)?.language_code;
-    if (tgLang) {
-      // Русский язык для ru, be, uk, kk и других стран СНГ
-      if (['ru', 'be', 'uk', 'kk', 'ky', 'uz', 'tg', 'az', 'hy', 'ka'].includes(tgLang)) {
-        return 'ru';
+  try {
+    // 1. Проверяем localStorage
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('language');
+      if (saved === 'en' || saved === 'ru') {
+        return saved;
       }
-      return 'en';
-    }
-  }
-  
-  // 2. Проверяем localStorage
-  if (typeof window !== 'undefined') {
-    const saved = localStorage.getItem('language');
-    if (saved === 'en' || saved === 'ru') {
-      return saved;
     }
     
-    // 3. Проверяем язык браузера
-    const browserLang = navigator.language.toLowerCase();
-    if (browserLang.startsWith('ru') || 
-        browserLang.startsWith('be') || 
-        browserLang.startsWith('uk')) {
-      return 'ru';
+    // 2. Проверяем язык браузера
+    if (typeof window !== 'undefined' && typeof navigator !== 'undefined' && navigator.language) {
+      const browserLang = navigator.language.toLowerCase();
+      if (browserLang.startsWith('ru') || 
+          browserLang.startsWith('be') || 
+          browserLang.startsWith('uk')) {
+        return 'ru';
+      }
     }
+  } catch (error) {
+    console.warn('Error detecting language:', error);
   }
   
-  // 4. По умолчанию английский
-  return 'en';
+  // 3. По умолчанию русский
+  return 'ru';
 }
 
 export function LanguageProvider({ children }: { children: ReactNode }) {
-  const [locale, setLocaleState] = useState<Locale>('ru');
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    // Определяем язык при монтировании
-    try {
-      const detectedLocale = detectUserLanguage();
-      setLocaleState(detectedLocale);
-    } catch (error) {
-      console.error('Error detecting language:', error);
-      setLocaleState('ru'); // Fallback to Russian
-    }
-    setMounted(true);
-  }, []);
+  // Инициализируем язык сразу, синхронно
+  const [locale, setLocaleState] = useState<Locale>(() => {
+    if (typeof window === 'undefined') return 'ru';
+    return detectUserLanguage();
+  });
 
   const setLocale = (newLocale: Locale) => {
     setLocaleState(newLocale);
     if (typeof window !== 'undefined') {
-      localStorage.setItem('language', newLocale);
+      try {
+        localStorage.setItem('language', newLocale);
+      } catch (error) {
+        console.warn('Failed to save language to localStorage:', error);
+      }
     }
   };
 
@@ -108,15 +97,6 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
     const template = getNestedValue(messages[locale], key);
     return interpolate(template, params);
   };
-
-  // Показываем заглушку пока не определили язык
-  if (!mounted) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-indigo-50 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-4 border-purple-500 border-t-transparent"></div>
-      </div>
-    );
-  }
 
   return (
     <LanguageContext.Provider value={{ locale, setLocale, t, messages: messages[locale] }}>
