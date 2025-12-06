@@ -106,6 +106,23 @@ export function getUserByTelegramId(telegramId: number): User | null {
   };
 }
 
+export function getAllUsers(): User[] {
+  const stmt = db.prepare('SELECT * FROM users ORDER BY created_at DESC');
+  const rows = stmt.all() as any[];
+  
+  return rows.map((row) => ({
+    id: row.id,
+    telegramId: row.telegram_id,
+    firstName: row.first_name,
+    lastName: row.last_name,
+    username: row.username,
+    photoUrl: row.photo_url,
+    isPremium: row.is_premium === 1,
+    premiumUntil: row.premium_until ? new Date(row.premium_until) : undefined,
+    createdAt: new Date(row.created_at),
+  }));
+}
+
 export function getUserById(id: string): User | null {
   const stmt = db.prepare('SELECT * FROM users WHERE id = ?');
   const row = stmt.get(id) as any;

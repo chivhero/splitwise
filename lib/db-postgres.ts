@@ -144,6 +144,24 @@ export async function getUserByTelegramId(telegramId: number): Promise<User | nu
   };
 }
 
+export async function getAllUsers(): Promise<User[]> {
+  const result = await sql`
+    SELECT * FROM users ORDER BY created_at DESC
+  `;
+
+  return result.rows.map((row) => ({
+    id: row.id,
+    telegramId: row.telegram_id,
+    firstName: row.first_name,
+    lastName: row.last_name,
+    username: row.username,
+    photoUrl: row.photo_url,
+    isPremium: row.is_premium,
+    premiumUntil: row.premium_until ? new Date(row.premium_until) : undefined,
+    createdAt: new Date(row.created_at),
+  }));
+}
+
 export async function getUserById(id: string): Promise<User | null> {
   const result = await sql`
     SELECT * FROM users WHERE id = ${id}

@@ -28,6 +28,7 @@ export const {
   createUser,
   getUserByTelegramId,
   getUserById,
+  getAllUsers,
   updateUserPremium,
   createGroup,
   addGroupMember,
