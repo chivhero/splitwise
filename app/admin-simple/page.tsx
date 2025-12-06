@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { getTelegramUser } from '@/lib/telegram';
-import { Users, DollarSign, TrendingUp, Crown } from 'lucide-react';
+import { Users, DollarSign, TrendingUp, Crown, Gift } from 'lucide-react';
 import Link from 'next/link';
 
 const ADMIN_IDS = [409627169];
@@ -128,7 +128,15 @@ export default function SimpleAdminDashboard() {
         </div>
 
         {/* Quick Actions */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+          <Link href="/admin-simple/users">
+            <div className="bg-purple-500/20 border border-purple-500/30 rounded-xl p-6 hover:bg-purple-500/30 transition-all cursor-pointer">
+              <Users className="text-purple-300 mb-3" size={28} />
+              <h3 className="text-lg font-bold text-white mb-1">Все пользователи</h3>
+              <p className="text-purple-200 text-sm">Просмотр и копирование User ID</p>
+            </div>
+          </Link>
+
           <Link href="/admin-simple/premium">
             <div className="bg-yellow-500/20 border border-yellow-500/30 rounded-xl p-6 hover:bg-yellow-500/30 transition-all cursor-pointer">
               <Crown className="text-yellow-300 mb-3" size={28} />
@@ -137,11 +145,13 @@ export default function SimpleAdminDashboard() {
             </div>
           </Link>
 
-          <div className="bg-purple-500/20 border border-purple-500/30 rounded-xl p-6 opacity-50">
-            <DollarSign className="text-purple-300 mb-3" size={28} />
-            <h3 className="text-lg font-bold text-white mb-1">Промо-коды</h3>
-            <p className="text-purple-200 text-sm">Скоро...</p>
-          </div>
+          <Link href="/admin-simple/promocodes">
+            <div className="bg-pink-500/20 border border-pink-500/30 rounded-xl p-6 hover:bg-pink-500/30 transition-all cursor-pointer">
+              <Gift className="text-pink-300 mb-3" size={28} />
+              <h3 className="text-lg font-bold text-white mb-1">Промо-коды</h3>
+              <p className="text-pink-200 text-sm">Создать промо-код для пользователей</p>
+            </div>
+          </Link>
         </div>
 
         {/* Info */}

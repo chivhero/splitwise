@@ -46,3 +46,4 @@ CREATE TABLE IF NOT EXISTS promo_code_uses (
 CREATE INDEX IF NOT EXISTS idx_promo_uses_code ON promo_code_uses(promo_code_id);
 CREATE INDEX IF NOT EXISTS idx_promo_uses_user ON promo_code_uses(user_id);
 
+

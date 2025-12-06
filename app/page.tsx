@@ -37,13 +37,29 @@ export default function Home() {
     
     // Проверяем, есть ли параметр для присоединения к группе
     if (typeof window !== 'undefined') {
-      const urlParams = new URLSearchParams(window.location.search);
-      const startParam = urlParams.get('tgWebAppStartParam') || urlParams.get('startapp');
+      // Telegram передаёт start_param через initDataUnsafe
+      const webApp = window.Telegram?.WebApp;
+      const startParam = webApp?.initDataUnsafe?.start_param || 
+                         new URLSearchParams(window.location.search).get('tgWebAppStartParam') ||
+                         new URLSearchParams(window.location.search).get('startapp');
+      
+      console.log('[Join Debug] URL:', window.location.href);
+      console.log('[Join Debug] WebApp start_param:', webApp?.initDataUnsafe?.start_param);
+      console.log('[Join Debug] URL params:', window.location.search);
+      console.log('[Join Debug] Final start param:', startParam);
       
       if (startParam && startParam.startsWith('join_')) {
         const groupId = startParam.replace('join_', '');
+        console.log('[Join Debug] ✅ Joining group:', groupId);
+        
+        // Показываем уведомление
+        if (webApp) {
+          webApp.showAlert('Присоединяемся к группе...');
+        }
+        
         handleJoinGroup(groupId, userId);
       } else {
+        console.log('[Join Debug] No join param, loading groups');
         loadGroups(userId);
       }
     } else {
@@ -76,25 +92,44 @@ export default function Home() {
 
   const handleJoinGroup = async (groupId: string, userId: number) => {
     try {
+      console.log('[Join] Sending request to join group:', groupId);
+      
       const response = await fetch(`/api/groups/${groupId}/join`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ telegramId: userId }),
       });
 
+      const data = await response.json();
+      console.log('[Join] Response:', data);
+
       if (response.ok) {
         hapticFeedback('success');
-        loadGroups(userId);
-        // Показываем уведомление
+        await loadGroups(userId);
+        
+        // Показываем уведомление об успехе
         if (typeof window !== 'undefined' && window.Telegram?.WebApp) {
-          window.Telegram.WebApp.showAlert(t('groups.joinSuccess'));
+          window.Telegram.WebApp.showAlert(`✅ Вы присоединились к группе!\n\nГруппа добавлена в ваш список.`);
+        } else {
+          alert('Вы успешно присоединились к группе!');
         }
       } else {
-        const data = await response.json();
-        console.error('Failed to join group:', data.error);
+        console.error('[Join] Failed:', data.error);
+        
+        // Показываем ошибку пользователю
+        const errorMsg = data.error || 'Не удалось присоединиться к группе';
+        if (typeof window !== 'undefined' && window.Telegram?.WebApp) {
+          window.Telegram.WebApp.showAlert(`❌ Ошибка: ${errorMsg}`);
+        } else {
+          alert(`Ошибка: ${errorMsg}`);
+        }
+        
+        // Всё равно загружаем группы
+        loadGroups(userId);
       }
     } catch (error) {
-      console.error('Failed to join group:', error);
+      console.error('[Join] Exception:', error);
+      loadGroups(userId);
     }
   };
 
