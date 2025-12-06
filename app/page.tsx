@@ -8,20 +8,32 @@ import CreateGroupModal from '@/components/CreateGroupModal';
 import PremiumBanner from '@/components/PremiumBanner';
 import LanguageSwitcher from '@/components/LanguageSwitcher';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { Plus } from 'lucide-react';
+import { Plus, Crown } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+
+// ID админов
+const ADMIN_IDS = [409627169];
 
 export default function Home() {
   const { t } = useLanguage();
+  const router = useRouter();
   const [groups, setGroups] = useState<Group[]>([]);
   const [loading, setLoading] = useState(true);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [telegramId, setTelegramId] = useState<number | null>(null);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
     const tgUser = getTelegramUser();
     const userId = tgUser ? tgUser.id : 123456789; // Тестовый ID для разработки
     
     setTelegramId(userId);
+    
+    // Проверяем является ли пользователь админом
+    if (userId && ADMIN_IDS.includes(userId)) {
+      setIsAdmin(true);
+      console.log('👑 Admin detected!');
+    }
     
     // Проверяем, есть ли параметр для присоединения к группе
     if (typeof window !== 'undefined') {
@@ -100,7 +112,21 @@ export default function Home() {
       <div className="bg-gradient-to-r from-purple-600 via-purple-500 to-indigo-600 text-white p-6 rounded-b-3xl shadow-xl">
         <div className="flex justify-between items-start mb-2">
           <h1 className="text-2xl font-bold">💰 {t('groups.title')}</h1>
-          <LanguageSwitcher />
+          <div className="flex gap-2 items-center">
+            {isAdmin && (
+              <button
+                onClick={() => {
+                  hapticFeedback('light');
+                  router.push('/admin');
+                }}
+                className="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-lg font-semibold flex items-center gap-2 transition-all shadow-lg hover:shadow-xl active:scale-95"
+              >
+                <Crown size={18} />
+                Админ
+              </button>
+            )}
+            <LanguageSwitcher />
+          </div>
         </div>
         <p className="text-purple-100 text-sm">
           {t('home.description')}
