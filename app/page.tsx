@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { getTelegramUser, isTelegramWebApp, hapticFeedback } from '@/lib/telegram';
+import { useWebApp, useHapticFeedback } from '@/lib/telegram';
 import { Group } from '@/types';
 import GroupList from '@/components/GroupList';
 import CreateGroupModal from '@/components/CreateGroupModal';
@@ -17,16 +17,18 @@ export default function Home() {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [telegramId, setTelegramId] = useState<number | null>(null);
 
+  const webApp = useWebApp();
+  const hapticFeedback = useHapticFeedback();
+
   useEffect(() => {
-    const tgUser = getTelegramUser();
+    const tgUser = webApp?.initDataUnsafe?.user;
     const userId = tgUser ? tgUser.id : 123456789; // Тестовый ID для разработки
     
     setTelegramId(userId);
     
-    // Проверяем, есть ли параметр для присоединения к группе
-    if (typeof window !== 'undefined') {
-      const urlParams = new URLSearchParams(window.location.search);
-      const startParam = urlParams.get('tgWebAppStartParam') || urlParams.get('startapp');
+    if (webApp?.initData) {
+      const urlParams = new URLSearchParams(webApp.initData);
+      const startParam = urlParams.get('start_param');
       
       if (startParam && startParam.startsWith('join_')) {
         const groupId = startParam.replace('join_', '');
@@ -37,7 +39,7 @@ export default function Home() {
     } else {
       loadGroups(userId);
     }
-  }, []);
+  }, [webApp]);
 
   const loadGroups = async (tgId: number) => {
     try {
@@ -52,14 +54,14 @@ export default function Home() {
   };
 
   const handleCreateGroup = () => {
-    hapticFeedback('light');
+    hapticFeedback.impactOccurred('light');
     setShowCreateModal(true);
   };
 
   const handleGroupCreated = (group: Group) => {
     setGroups([group, ...groups]);
     setShowCreateModal(false);
-    hapticFeedback('success');
+    hapticFeedback.notificationOccurred('success');
   };
 
   const handleJoinGroup = async (groupId: string, userId: number) => {
@@ -71,12 +73,9 @@ export default function Home() {
       });
 
       if (response.ok) {
-        hapticFeedback('success');
+        hapticFeedback.notificationOccurred('success');
         loadGroups(userId);
-        // Показываем уведомление
-        if (typeof window !== 'undefined' && window.Telegram?.WebApp) {
-          window.Telegram.WebApp.showAlert(t('groups.joinSuccess'));
-        }
+        webApp?.showAlert(t('groups.joinSuccess'));
       } else {
         const data = await response.json();
         console.error('Failed to join group:', data.error);

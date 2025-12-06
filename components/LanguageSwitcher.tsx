@@ -2,13 +2,14 @@
 
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Globe } from 'lucide-react';
-import { hapticFeedback } from '@/lib/telegram';
+import { useHapticFeedback } from '@/lib/telegram';
 
 export default function LanguageSwitcher() {
   const { locale, setLocale } = useLanguage();
+  const hapticFeedback = useHapticFeedback();
 
   const handleToggle = () => {
-    hapticFeedback('light');
+    hapticFeedback.impactOccurred('light');
     setLocale(locale === 'en' ? 'ru' : 'en');
   };
 
@@ -23,5 +24,3 @@ export default function LanguageSwitcher() {
     </button>
   );
 }
-
-

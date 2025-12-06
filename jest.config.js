@@ -15,6 +15,7 @@ const customJestConfig = {
   // Mapping для импортов
   moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/$1',
+    '^react$': '<rootDir>/node_modules/react/index.js',
   },
   
   // Паттерны для поиска тестов
@@ -42,4 +43,3 @@ const customJestConfig = {
 }
 
 module.exports = createJestConfig(customJestConfig)
-

@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { Expense, Group } from '@/types';
 import { X } from 'lucide-react';
-import { hapticFeedback, showTelegramPopup } from '@/lib/telegram';
+import { useHapticFeedback, usePopup } from '@/lib/telegram';
 import { useLanguage } from '@/contexts/LanguageContext';
 
 interface AddExpenseModalProps {
@@ -22,6 +22,9 @@ export default function AddExpenseModal({ telegramId, group, onClose, onExpenseA
   const [category, setCategory] = useState('other');
   const [loading, setLoading] = useState(false);
 
+  const hapticFeedback = useHapticFeedback();
+  const popup = usePopup();
+
   const categories = [
     { id: 'food', emoji: '🍔' },
     { id: 'transport', emoji: '🚗' },
@@ -39,30 +42,30 @@ export default function AddExpenseModal({ telegramId, group, onClose, onExpenseA
     } else {
       setSplitBetween([...splitBetween, memberTgId]);
     }
-    hapticFeedback('light');
+    hapticFeedback.impactOccurred('light');
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!description.trim()) {
-      showTelegramPopup(t('expenses.descriptionRequired'));
+      popup.showAlert(t('expenses.descriptionRequired'));
       return;
     }
 
     const amountNum = parseFloat(amount);
     if (isNaN(amountNum) || amountNum <= 0) {
-      showTelegramPopup(t('expenses.amountRequired'));
+      popup.showAlert(t('expenses.amountRequired'));
       return;
     }
 
     if (splitBetween.length === 0) {
-      showTelegramPopup(t('expenses.splitBetweenRequired'));
+      popup.showAlert(t('expenses.splitBetweenRequired'));
       return;
     }
 
     setLoading(true);
-    hapticFeedback('light');
+    hapticFeedback.impactOccurred('light');
 
     try {
       const response = await fetch(`/api/groups/${group.id}/expenses`, {
@@ -82,15 +85,15 @@ export default function AddExpenseModal({ telegramId, group, onClose, onExpenseA
 
       if (response.ok) {
         onExpenseAdded(data.expense);
-        hapticFeedback('success');
+        hapticFeedback.notificationOccurred('success');
       } else {
-        showTelegramPopup(data.error || t('expenses.error'));
-        hapticFeedback('error');
+        popup.showAlert(data.error || t('expenses.error'));
+        hapticFeedback.notificationOccurred('error');
       }
     } catch (error) {
       console.error('Failed to add expense:', error);
-      showTelegramPopup(t('expenses.connectionError'));
-      hapticFeedback('error');
+      popup.showAlert(t('expenses.connectionError'));
+      hapticFeedback.notificationOccurred('error');
     } finally {
       setLoading(false);
     }
@@ -153,7 +156,7 @@ export default function AddExpenseModal({ telegramId, group, onClose, onExpenseA
                   type="button"
                   onClick={() => {
                     setCategory(cat.id);
-                    hapticFeedback('light');
+                    hapticFeedback.impactOccurred('light');
                   }}
                   className={`p-3 rounded-xl border-2 text-sm transition-colors ${
                     category === cat.id
@@ -183,7 +186,7 @@ export default function AddExpenseModal({ telegramId, group, onClose, onExpenseA
                     type="button"
                     onClick={() => {
                       setPaidBy(tgId);
-                      hapticFeedback('light');
+                      hapticFeedback.impactOccurred('light');
                     }}
                     className={`w-full p-3 rounded-xl border-2 text-left transition-colors ${
                       isSelected
@@ -270,11 +273,3 @@ export default function AddExpenseModal({ telegramId, group, onClose, onExpenseA
     </div>
   );
 }
-
-
-
-
-
-
-
-

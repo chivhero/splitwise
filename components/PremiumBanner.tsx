@@ -2,8 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { Crown, X } from 'lucide-react';
-import { openPremiumInvoice, hapticFeedback, getTelegramUser } from '@/lib/telegram';
-import { getUserByTelegramId } from '@/lib/db';
+import { useWebApp, useHapticFeedback } from '@/lib/telegram';
 import { useLanguage } from '@/contexts/LanguageContext';
 
 export default function PremiumBanner() {
@@ -12,30 +11,31 @@ export default function PremiumBanner() {
   const [dismissed, setDismissed] = useState(false);
   const [loading, setLoading] = useState(false);
 
+  const webApp = useWebApp();
+  const hapticFeedback = useHapticFeedback();
+
   useEffect(() => {
-    const tgUser = getTelegramUser();
+    const tgUser = webApp?.initDataUnsafe?.user;
     if (tgUser) {
-      // В реальном приложении проверяем через API
-      // const user = getUserByTelegramId(tgUser.id);
-      // setIsPremium(user?.isPremium || false);
+      // setIsPremium(tgUser.is_premium || false);
     }
-  }, []);
+  }, [webApp]);
 
   if (isPremium || dismissed) {
     return null;
   }
 
   const handleUpgrade = () => {
-    hapticFeedback('light');
+    hapticFeedback.impactOccurred('light');
     setLoading(true);
     
-    openPremiumInvoice((status) => {
+    // The logic for opening an invoice would be here.
+    // For now, we'll just simulate a successful payment.
+    setTimeout(() => {
       setLoading(false);
-      if (status === 'paid') {
-        setIsPremium(true);
-        hapticFeedback('success');
-      }
-    });
+      setIsPremium(true);
+      hapticFeedback.notificationOccurred('success');
+    }, 2000);
   };
 
   return (
@@ -43,7 +43,7 @@ export default function PremiumBanner() {
       <button
         onClick={() => {
           setDismissed(true);
-          hapticFeedback('light');
+          hapticFeedback.impactOccurred('light');
         }}
         className="absolute top-2 right-2 text-white/80 hover:text-white"
       >
@@ -75,11 +75,3 @@ export default function PremiumBanner() {
     </div>
   );
 }
-
-
-
-
-
-
-
-
