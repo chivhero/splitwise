@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { Group, Expense } from '@/types';
-import { getTelegramUser, hapticFeedback, shareGroupLink, isTelegramWebApp } from '@/lib/telegram';
+import { useWebApp, useHapticFeedback, useBackButton } from '@/lib/telegram';
 import { ArrowLeft, Plus, Users, TrendingUp, UserPlus } from 'lucide-react';
 import ExpenseList from '@/components/ExpenseList';
 import AddExpenseModal from '@/components/AddExpenseModal';
@@ -17,6 +17,10 @@ export default function GroupPage() {
   const params = useParams();
   const groupId = params?.groupId as string;
 
+  const webApp = useWebApp();
+  const hapticFeedback = useHapticFeedback();
+  const backButton = useBackButton();
+
   const [group, setGroup] = useState<Group | null>(null);
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [loading, setLoading] = useState(true);
@@ -26,15 +30,23 @@ export default function GroupPage() {
   const [telegramId, setTelegramId] = useState<number | null>(null);
 
   useEffect(() => {
-    const tgUser = getTelegramUser();
+    const tgUser = webApp?.initDataUnsafe?.user;
     if (tgUser) {
       setTelegramId(tgUser.id);
     } else {
-      // Для тестирования вне Telegram
       setTelegramId(123456789);
     }
     loadGroupData();
-  }, [groupId]);
+
+    const onBackClick = () => router.push('/');
+    backButton.show();
+    backButton.onClick(onBackClick);
+
+    return () => {
+      backButton.offClick(onBackClick);
+      backButton.hide();
+    };
+  }, [groupId, webApp, backButton, router]);
 
   const loadGroupData = async () => {
     try {
@@ -56,30 +68,34 @@ export default function GroupPage() {
   };
 
   const handleAddExpense = () => {
-    hapticFeedback('light');
+    hapticFeedback.impactOccurred('light');
     setShowAddExpense(true);
   };
 
   const handleExpenseAdded = (expense: Expense) => {
     setExpenses([expense, ...expenses]);
     setShowAddExpense(false);
-    hapticFeedback('success');
-    loadGroupData(); // Перезагружаем данные для обновления балансов
+    hapticFeedback.notificationOccurred('success');
+    loadGroupData();
   };
 
   const handleAddMember = () => {
-    hapticFeedback('light');
+    hapticFeedback.impactOccurred('light');
     setShowAddMember(true);
   };
 
   const handleMemberAdded = () => {
     setShowAddMember(false);
     loadGroupData();
-    hapticFeedback('success');
+    hapticFeedback.notificationOccurred('success');
   };
 
   const handleShareLink = () => {
-    shareGroupLink(groupId, group?.name || 'Group');
+    const botUsername = process.env.NEXT_PUBLIC_TELEGRAM_BOT_USERNAME || 'SplitWisedbot';
+    const url = `https://t.me/${botUsername}?startapp=join_${groupId}`;
+    const text = `🎉 Присоединяйся к группе "${group?.name || 'Group'}" для разделения расходов!`;
+    const shareUrl = `https://t.me/share/url?url=${encodeURIComponent(url)}&text=${encodeURIComponent(text)}`;
+    webApp?.openTelegramLink(shareUrl);
   };
 
   if (loading) {
@@ -105,7 +121,6 @@ export default function GroupPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-indigo-50 pb-20">
-      {/* Header */}
       <div className="bg-gradient-to-r from-purple-600 via-purple-500 to-indigo-600 text-white p-6 rounded-b-3xl shadow-xl">
         <div className="flex items-center gap-3 mb-4">
         <button
@@ -139,12 +154,11 @@ export default function GroupPage() {
         </div>
       </div>
 
-      {/* Tabs */}
       <div className="flex gap-2 px-4 mt-4">
           <button
             onClick={() => {
               setActiveTab('expenses');
-              hapticFeedback('light');
+              hapticFeedback.impactOccurred('light');
             }}
           className={`flex-1 py-3 rounded-lg font-medium transition-all ${
               activeTab === 'expenses'
@@ -160,7 +174,7 @@ export default function GroupPage() {
           <button
             onClick={() => {
               setActiveTab('settlements');
-              hapticFeedback('light');
+              hapticFeedback.impactOccurred('light');
             }}
           className={`flex-1 py-3 rounded-lg font-medium transition-all ${
               activeTab === 'settlements'
@@ -175,7 +189,6 @@ export default function GroupPage() {
           </button>
       </div>
 
-      {/* Content */}
       <div className="px-4 mt-4">
         {activeTab === 'expenses' ? (
           expenses.length === 0 ? (
@@ -196,7 +209,6 @@ export default function GroupPage() {
         )}
       </div>
 
-      {/* Floating Action Button */}
       {activeTab === 'expenses' && expenses.length > 0 && (
         <button
           onClick={handleAddExpense}
@@ -206,7 +218,6 @@ export default function GroupPage() {
         </button>
       )}
 
-      {/* Modals */}
       {showAddExpense && group && telegramId && (
         <AddExpenseModal
           group={group}

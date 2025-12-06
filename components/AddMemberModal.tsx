@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { X } from 'lucide-react';
-import { hapticFeedback, showTelegramPopup } from '@/lib/telegram';
+import { useHapticFeedback, usePopup } from '@/lib/telegram';
 import { useLanguage } from '@/contexts/LanguageContext';
 
 interface AddMemberModalProps {
@@ -17,16 +17,19 @@ export default function AddMemberModal({ groupId, onClose, onMemberAdded }: AddM
   const [lastName, setLastName] = useState('');
   const [loading, setLoading] = useState(false);
 
+  const hapticFeedback = useHapticFeedback();
+  const popup = usePopup();
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!firstName.trim()) {
-      showTelegramPopup(t('addMember.firstNameRequired'));
+      popup.showAlert(t('addMember.firstNameRequired'));
       return;
     }
 
     setLoading(true);
-    hapticFeedback('light');
+    hapticFeedback.impactOccurred('light');
 
     try {
       // Генерируем случайный Telegram ID для тестирования
@@ -56,16 +59,16 @@ export default function AddMemberModal({ groupId, onClose, onMemberAdded }: AddM
 
       if (joinResponse.ok) {
         onMemberAdded();
-        hapticFeedback('success');
+        hapticFeedback.notificationOccurred('success');
       } else {
         const data = await joinResponse.json();
-        showTelegramPopup(data.error || t('addMember.error'));
-        hapticFeedback('error');
+        popup.showAlert(data.error || t('addMember.error'));
+        hapticFeedback.notificationOccurred('error');
       }
     } catch (error) {
       console.error('Failed to add member:', error);
-      showTelegramPopup(t('addMember.connectionError'));
-      hapticFeedback('error');
+      popup.showAlert(t('addMember.connectionError'));
+      hapticFeedback.notificationOccurred('error');
     } finally {
       setLoading(false);
     }
@@ -144,7 +147,3 @@ export default function AddMemberModal({ groupId, onClose, onMemberAdded }: AddM
     </div>
   );
 }
-
-
-
-

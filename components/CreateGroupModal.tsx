@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { Group } from '@/types';
 import { X } from 'lucide-react';
-import { hapticFeedback, showTelegramPopup } from '@/lib/telegram';
+import { useHapticFeedback, usePopup } from '@/lib/telegram';
 import { useLanguage } from '@/contexts/LanguageContext';
 
 interface CreateGroupModalProps {
@@ -19,16 +19,19 @@ export default function CreateGroupModal({ telegramId, onClose, onGroupCreated }
   const [currency, setCurrency] = useState('USD');
   const [loading, setLoading] = useState(false);
 
+  const hapticFeedback = useHapticFeedback();
+  const popup = usePopup();
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!name.trim()) {
-      showTelegramPopup(t('createGroup.nameRequired'));
+      popup.showAlert(t('createGroup.nameRequired'));
       return;
     }
 
     setLoading(true);
-    hapticFeedback('light');
+    hapticFeedback.impactOccurred('light');
 
     try {
       const response = await fetch('/api/groups', {
@@ -46,15 +49,15 @@ export default function CreateGroupModal({ telegramId, onClose, onGroupCreated }
 
       if (response.ok) {
         onGroupCreated(data.group);
-        hapticFeedback('success');
+        hapticFeedback.notificationOccurred('success');
       } else {
-        showTelegramPopup(data.error || t('createGroup.error'));
-        hapticFeedback('error');
+        popup.showAlert(data.error || t('createGroup.error'));
+        hapticFeedback.notificationOccurred('error');
       }
     } catch (error) {
       console.error('Failed to create group:', error);
-      showTelegramPopup(t('createGroup.connectionError'));
-      hapticFeedback('error');
+      popup.showAlert(t('createGroup.connectionError'));
+      hapticFeedback.notificationOccurred('error');
     } finally {
       setLoading(false);
     }
@@ -146,14 +149,3 @@ export default function CreateGroupModal({ telegramId, onClose, onGroupCreated }
     </div>
   );
 }
-
-
-
-
-
-
-
-
-
-
-

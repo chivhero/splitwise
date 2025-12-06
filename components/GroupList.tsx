@@ -3,7 +3,7 @@
 import { Group } from '@/types';
 import { Users, ChevronRight } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { hapticFeedback } from '@/lib/telegram';
+import { useHapticFeedback } from '@/lib/telegram';
 import { useLanguage } from '@/contexts/LanguageContext';
 
 interface GroupListProps {
@@ -13,9 +13,10 @@ interface GroupListProps {
 export default function GroupList({ groups }: GroupListProps) {
   const { t, locale } = useLanguage();
   const router = useRouter();
+  const hapticFeedback = useHapticFeedback();
 
   const handleGroupClick = (groupId: string) => {
-    hapticFeedback('light');
+    hapticFeedback.impactOccurred('light');
     router.push(`/group/${groupId}`);
   };
 
@@ -69,11 +70,3 @@ export default function GroupList({ groups }: GroupListProps) {
     </div>
   );
 }
-
-
-
-
-
-
-
-

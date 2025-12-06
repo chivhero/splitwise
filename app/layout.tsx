@@ -1,7 +1,7 @@
 import './globals.css';
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
-import TelegramProvider from '@/components/TelegramProvider';
+import { SDKProvider } from '@twa-dev/sdk/react';
 import { LanguageProvider } from '@/contexts/LanguageContext';
 import ErrorBoundary from '@/components/ErrorBoundary';
 
@@ -19,19 +19,15 @@ export default function RootLayout({
 }) {
   return (
     <html lang="ru">
-      <head>
-        <script src="https://telegram.org/js/telegram-web-app.js"></script>
-      </head>
       <body className={inter.className}>
         <ErrorBoundary>
           <LanguageProvider>
-            <TelegramProvider>
+            <SDKProvider>
               {children}
-            </TelegramProvider>
+            </SDKProvider>
           </LanguageProvider>
         </ErrorBoundary>
       </body>
     </html>
   );
 }
-
