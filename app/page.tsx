@@ -39,7 +39,8 @@ export default function Home() {
     if (typeof window !== 'undefined') {
       // Telegram передаёт start_param через initDataUnsafe
       const webApp = window.Telegram?.WebApp;
-      const startParam = webApp?.initDataUnsafe?.start_param || 
+      const initDataUnsafe = webApp?.initDataUnsafe as any;
+      const startParam = initDataUnsafe?.start_param || 
                          new URLSearchParams(window.location.search).get('tgWebAppStartParam') ||
                          new URLSearchParams(window.location.search).get('startapp');
       
