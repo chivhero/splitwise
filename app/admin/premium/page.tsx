@@ -5,8 +5,9 @@ import { adminAPI } from '@/lib/api-client';
 import { Crown, ArrowLeft, Check } from 'lucide-react';
 import Link from 'next/link';
 import { hapticFeedback } from '@/lib/telegram';
+import AdminLayout from '@/components/AdminLayout';
 
-export default function AdminPremiumPage() {
+function AdminPremiumPageContent() {
   const [targetUserId, setTargetUserId] = useState('');
   const [days, setDays] = useState('30');
   const [loading, setLoading] = useState(false);
@@ -178,6 +179,14 @@ export default function AdminPremiumPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function AdminPremiumPage() {
+  return (
+    <AdminLayout>
+      <AdminPremiumPageContent />
+    </AdminLayout>
   );
 }
 

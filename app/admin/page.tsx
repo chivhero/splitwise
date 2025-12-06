@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { adminAPI } from '@/lib/api-client';
 import { Users, DollarSign, TrendingUp, Crown } from 'lucide-react';
 import Link from 'next/link';
+import AdminLayout from '@/components/AdminLayout';
 
 interface Stats {
   totalUsers: number;
@@ -12,7 +13,7 @@ interface Stats {
   totalPremiumUsers: number;
 }
 
-export default function AdminDashboard() {
+function AdminDashboardContent() {
   const [stats, setStats] = useState<Stats | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -159,6 +160,14 @@ export default function AdminDashboard() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function AdminDashboard() {
+  return (
+    <AdminLayout>
+      <AdminDashboardContent />
+    </AdminLayout>
   );
 }
 
