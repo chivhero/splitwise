@@ -127,6 +127,23 @@ export default function SimpleAdminDashboard() {
           </div>
         </div>
 
+        {/* Quick Actions */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+          <Link href="/admin-simple/premium">
+            <div className="bg-yellow-500/20 border border-yellow-500/30 rounded-xl p-6 hover:bg-yellow-500/30 transition-all cursor-pointer">
+              <Crown className="text-yellow-300 mb-3" size={28} />
+              <h3 className="text-lg font-bold text-white mb-1">Выдать Premium</h3>
+              <p className="text-yellow-200 text-sm">Выдать подписку пользователю</p>
+            </div>
+          </Link>
+
+          <div className="bg-purple-500/20 border border-purple-500/30 rounded-xl p-6 opacity-50">
+            <DollarSign className="text-purple-300 mb-3" size={28} />
+            <h3 className="text-lg font-bold text-white mb-1">Промо-коды</h3>
+            <p className="text-purple-200 text-sm">Скоро...</p>
+          </div>
+        </div>
+
         {/* Info */}
         <div className="bg-blue-500/20 backdrop-blur-sm border border-blue-500/30 rounded-2xl p-6">
           <h3 className="text-lg font-bold text-white mb-3">👑 Добро пожаловать, админ!</h3>
