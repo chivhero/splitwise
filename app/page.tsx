@@ -45,7 +45,7 @@ export default function Home() {
                          new URLSearchParams(window.location.search).get('startapp');
       
       console.log('[Join Debug] URL:', window.location.href);
-      console.log('[Join Debug] WebApp start_param:', webApp?.initDataUnsafe?.start_param);
+      console.log('[Join Debug] WebApp start_param:', initDataUnsafe?.start_param);
       console.log('[Join Debug] URL params:', window.location.search);
       console.log('[Join Debug] Final start param:', startParam);
       
