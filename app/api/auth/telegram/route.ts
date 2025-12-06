@@ -1,11 +1,24 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createUser, getUserByTelegramId } from '@/lib/db-adapter';
+import { createUser, getUserByTelegramId, initDB } from '@/lib/db-adapter';
 import { TelegramUser } from '@/types';
+
+// Инициализируем БД при старте
+let dbInitialized = false;
 
 export async function POST(request: NextRequest) {
   try {
+    // Инициализируем БД если ещё не сделали
+    if (!dbInitialized) {
+      console.log('🔧 Initializing database...');
+      await initDB();
+      dbInitialized = true;
+      console.log('✅ Database initialized!');
+    }
+
     const body = await request.json();
     const telegramUser: TelegramUser = body.telegramUser;
+
+    console.log('👤 Authenticating user:', telegramUser);
 
     if (!telegramUser || !telegramUser.id) {
       return NextResponse.json(
@@ -19,6 +32,7 @@ export async function POST(request: NextRequest) {
 
     // Если нет - создаём
     if (!user) {
+      console.log('➕ Creating new user:', telegramUser.id);
       user = await createUser(
         telegramUser.id,
         telegramUser.first_name,
@@ -26,13 +40,16 @@ export async function POST(request: NextRequest) {
         telegramUser.username,
         telegramUser.photo_url
       );
+      console.log('✅ User created:', user.id);
+    } else {
+      console.log('✅ User already exists:', user.id);
     }
 
     return NextResponse.json({ user });
   } catch (error) {
-    console.error('Auth error:', error);
+    console.error('❌ Auth error:', error);
     return NextResponse.json(
-      { error: 'Authentication failed' },
+      { error: 'Authentication failed', details: error instanceof Error ? error.message : 'Unknown error' },
       { status: 500 }
     );
   }
