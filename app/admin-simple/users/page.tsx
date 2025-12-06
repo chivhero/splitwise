@@ -26,14 +26,21 @@ export default function AdminUsersPage() {
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
   useEffect(() => {
+    console.log('[Admin Users] Checking admin access...');
     const tgUser = getTelegramUser();
+    console.log('[Admin Users] Telegram user:', tgUser);
+    
     const userId = tgUser?.id;
+    console.log('[Admin Users] User ID:', userId);
+    console.log('[Admin Users] Admin IDs:', ADMIN_IDS);
     
     if (!userId || !ADMIN_IDS.includes(userId)) {
+      console.error('[Admin Users] Access denied!');
       window.location.href = '/';
       return;
     }
     
+    console.log('[Admin Users] Access granted! Loading users...');
     setAdminId(userId);
     loadUsers(userId);
   }, []);
@@ -41,15 +48,27 @@ export default function AdminUsersPage() {
   const loadUsers = async (adminTelegramId: number) => {
     try {
       setLoading(true);
-      const response = await fetch(`/api/admin-simple/users?adminTelegramId=${adminTelegramId}`);
+      console.log('[Admin Users] Fetching users for admin:', adminTelegramId);
+      
+      const url = `/api/admin-simple/users?adminTelegramId=${adminTelegramId}`;
+      console.log('[Admin Users] URL:', url);
+      
+      const response = await fetch(url);
+      console.log('[Admin Users] Response status:', response.status);
       
       if (!response.ok) {
-        throw new Error('Failed to fetch users');
+        const errorData = await response.json();
+        console.error('[Admin Users] Error response:', errorData);
+        throw new Error(errorData.error || 'Failed to fetch users');
       }
       
       const data = await response.json();
+      console.log('[Admin Users] Data:', data);
+      console.log('[Admin Users] Users count:', data.users?.length || 0);
+      
       setUsers(data.users || []);
     } catch (err: any) {
+      console.error('[Admin Users] Error:', err);
       setError(err.message);
     } finally {
       setLoading(false);
