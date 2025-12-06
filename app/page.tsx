@@ -117,7 +117,7 @@ export default function Home() {
               <button
                 onClick={() => {
                   hapticFeedback('light');
-                  router.push('/admin');
+                  router.push('/admin-simple');
                 }}
                 className="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-lg font-semibold flex items-center gap-2 transition-all shadow-lg hover:shadow-xl active:scale-95"
               >
