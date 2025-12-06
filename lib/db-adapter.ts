@@ -37,11 +37,20 @@ export const {
   createExpense,
   getGroupExpenses,
   deleteExpense,
+  logAdminAction,
+  getAuditLog,
+  createPromoCode,
+  getPromoCode,
+  usePromoCode,
+  getAllPromoCodes,
 } = db;
 
 // Export дополнительных функций если они есть
 export const healthCheck = db.healthCheck;
 export const getStats = db.getStats;
+
+// Export типов
+export type { AuditLogEntry, PromoCode } from './db-postgres';
 
 export default db.default || db;
 

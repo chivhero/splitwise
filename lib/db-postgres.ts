@@ -384,17 +384,195 @@ export async function healthCheck(): Promise<boolean> {
 }
 
 export async function getStats() {
-  const [users, groups, expenses] = await Promise.all([
+  const [users, groups, expenses, premiumUsers] = await Promise.all([
     sql`SELECT COUNT(*) as count FROM users`,
     sql`SELECT COUNT(*) as count FROM groups`,
     sql`SELECT COUNT(*) as count FROM expenses`,
+    sql`SELECT COUNT(*) as count FROM users WHERE is_premium = true`,
   ]);
 
   return {
     totalUsers: parseInt(users.rows[0].count),
     totalGroups: parseInt(groups.rows[0].count),
     totalExpenses: parseInt(expenses.rows[0].count),
+    totalPremiumUsers: parseInt(premiumUsers.rows[0].count),
   };
+}
+
+// ============================================
+// ADMIN AUDIT LOG
+// ============================================
+
+export interface AuditLogEntry {
+  id?: number;
+  adminId: number;
+  action: string;
+  targetUserId?: string;
+  targetEntityId?: string;
+  details?: Record<string, any>;
+  ipAddress?: string;
+  userAgent?: string;
+  createdAt?: Date;
+}
+
+export async function logAdminAction(entry: AuditLogEntry): Promise<void> {
+  await sql`
+    INSERT INTO admin_audit_log (
+      admin_id, action, target_user_id, target_entity_id,
+      details, ip_address, user_agent
+    ) VALUES (
+      ${entry.adminId},
+      ${entry.action},
+      ${entry.targetUserId || null},
+      ${entry.targetEntityId || null},
+      ${JSON.stringify(entry.details || {})},
+      ${entry.ipAddress || null},
+      ${entry.userAgent || null}
+    )
+  `;
+}
+
+export async function getAuditLog(limit: number = 50): Promise<AuditLogEntry[]> {
+  const result = await sql`
+    SELECT * FROM admin_audit_log
+    ORDER BY created_at DESC
+    LIMIT ${limit}
+  `;
+
+  return result.rows.map(row => ({
+    id: row.id,
+    adminId: row.admin_id,
+    action: row.action,
+    targetUserId: row.target_user_id,
+    targetEntityId: row.target_entity_id,
+    details: row.details,
+    ipAddress: row.ip_address,
+    userAgent: row.user_agent,
+    createdAt: new Date(row.created_at),
+  }));
+}
+
+// ============================================
+// PROMO CODES
+// ============================================
+
+export interface PromoCode {
+  id?: number;
+  code: string;
+  days: number;
+  maxUses: number;
+  currentUses: number;
+  createdBy: number;
+  isActive: boolean;
+  expiresAt?: Date;
+  createdAt?: Date;
+}
+
+export async function createPromoCode(code: string, days: number, maxUses: number, createdBy: number): Promise<PromoCode> {
+  const result = await sql`
+    INSERT INTO promo_codes (code, days, max_uses, created_by)
+    VALUES (${code}, ${days}, ${maxUses}, ${createdBy})
+    RETURNING *
+  `;
+
+  const row = result.rows[0];
+  return {
+    id: row.id,
+    code: row.code,
+    days: row.days,
+    maxUses: row.max_uses,
+    currentUses: row.current_uses,
+    createdBy: row.created_by,
+    isActive: row.is_active,
+    expiresAt: row.expires_at ? new Date(row.expires_at) : undefined,
+    createdAt: new Date(row.created_at),
+  };
+}
+
+export async function getPromoCode(code: string): Promise<PromoCode | null> {
+  const result = await sql`
+    SELECT * FROM promo_codes WHERE code = ${code} AND is_active = true
+  `;
+
+  if (result.rows.length === 0) return null;
+
+  const row = result.rows[0];
+  return {
+    id: row.id,
+    code: row.code,
+    days: row.days,
+    maxUses: row.max_uses,
+    currentUses: row.current_uses,
+    createdBy: row.created_by,
+    isActive: row.is_active,
+    expiresAt: row.expires_at ? new Date(row.expires_at) : undefined,
+    createdAt: new Date(row.created_at),
+  };
+}
+
+export async function usePromoCode(code: string, userId: string): Promise<boolean> {
+  try {
+    // Получаем промо-код
+    const promo = await getPromoCode(code);
+    if (!promo || !promo.id) return false;
+
+    // Проверяем лимит использований
+    if (promo.currentUses >= promo.maxUses) return false;
+
+    // Проверяем не использовал ли пользователь этот код ранее
+    const existingUse = await sql`
+      SELECT * FROM promo_code_uses
+      WHERE promo_code_id = ${promo.id} AND user_id = ${userId}
+    `;
+
+    if (existingUse.rows.length > 0) return false;
+
+    // Выдаём Premium пользователю
+    const user = await getUserById(userId);
+    if (!user) return false;
+
+    const expiresAt = new Date();
+    expiresAt.setDate(expiresAt.getDate() + promo.days);
+
+    await updateUserPremium(userId, expiresAt);
+
+    // Увеличиваем счётчик использований
+    await sql`
+      UPDATE promo_codes
+      SET current_uses = current_uses + 1
+      WHERE id = ${promo.id}
+    `;
+
+    // Записываем использование
+    await sql`
+      INSERT INTO promo_code_uses (promo_code_id, user_id)
+      VALUES (${promo.id}, ${userId})
+    `;
+
+    return true;
+  } catch (error) {
+    console.error('Error using promo code:', error);
+    return false;
+  }
+}
+
+export async function getAllPromoCodes(): Promise<PromoCode[]> {
+  const result = await sql`
+    SELECT * FROM promo_codes
+    ORDER BY created_at DESC
+  `;
+
+  return result.rows.map(row => ({
+    id: row.id,
+    code: row.code,
+    days: row.days,
+    maxUses: row.max_uses,
+    currentUses: row.current_uses,
+    createdBy: row.created_by,
+    isActive: row.is_active,
+    expiresAt: row.expires_at ? new Date(row.expires_at) : undefined,
+    createdAt: new Date(row.created_at),
+  }));
 }
 
 

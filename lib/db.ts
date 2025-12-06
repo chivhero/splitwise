@@ -309,6 +309,75 @@ export function deleteExpense(expenseId: string) {
   stmt.run(expenseId);
 }
 
+// ============================================
+// ADMIN AUDIT LOG (Simplified for SQLite)
+// ============================================
+
+export interface AuditLogEntry {
+  id?: number;
+  adminId: number;
+  action: string;
+  targetUserId?: string;
+  targetEntityId?: string;
+  details?: Record<string, any>;
+  ipAddress?: string;
+  userAgent?: string;
+  createdAt?: Date;
+}
+
+export function logAdminAction(entry: AuditLogEntry): void {
+  // For SQLite in development, just console.log
+  console.log('📝 Admin Action:', entry);
+}
+
+export function getAuditLog(limit: number = 50): AuditLogEntry[] {
+  // Placeholder for SQLite
+  return [];
+}
+
+// ============================================
+// PROMO CODES (Simplified for SQLite)
+// ============================================
+
+export interface PromoCode {
+  id?: number;
+  code: string;
+  days: number;
+  maxUses: number;
+  currentUses: number;
+  createdBy: number;
+  isActive: boolean;
+  expiresAt?: Date;
+  createdAt?: Date;
+}
+
+export function createPromoCode(code: string, days: number, maxUses: number, createdBy: number): PromoCode {
+  console.log('Creating promo code (SQLite dev mode):', { code, days, maxUses });
+  return {
+    code,
+    days,
+    maxUses,
+    currentUses: 0,
+    createdBy,
+    isActive: true,
+    createdAt: new Date(),
+  };
+}
+
+export function getPromoCode(code: string): PromoCode | null {
+  console.log('Getting promo code (SQLite dev mode):', code);
+  return null;
+}
+
+export function usePromoCode(code: string, userId: string): boolean {
+  console.log('Using promo code (SQLite dev mode):', { code, userId });
+  return false;
+}
+
+export function getAllPromoCodes(): PromoCode[] {
+  return [];
+}
+
 // Инициализация БД при импорте
 initDB();
 
