@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { addGroupMember, getUserByTelegramId, getGroupById } from '@/lib/db-adapter';
+import { addGroupMember, getUserByTelegramId, getGroupById, createUser } from '@/lib/db-adapter';
 
 export async function POST(
   request: NextRequest,
@@ -19,7 +19,7 @@ export async function POST(
     const groupId = params.groupId;
 
     // Проверяем существование группы
-    const group = getGroupById(groupId);
+    const group = await getGroupById(groupId);
     if (!group) {
       return NextResponse.json(
         { error: 'Group not found' },
@@ -28,10 +28,9 @@ export async function POST(
     }
 
     // Получаем или создаём пользователя
-    let user = getUserByTelegramId(Number(telegramId));
+    let user = await getUserByTelegramId(Number(telegramId));
     if (!user) {
-      const { createUser } = require('@/lib/db');
-      user = createUser(Number(telegramId), 'New User', '', 'user_' + telegramId);
+      user = await createUser(Number(telegramId), 'New User', '', 'user_' + telegramId);
     }
 
     // Проверяем, не является ли пользователь уже участником
@@ -44,10 +43,10 @@ export async function POST(
     }
 
     // Добавляем пользователя в группу
-    addGroupMember(groupId, user.id);
+    await addGroupMember(groupId, user.id);
 
     // Получаем обновлённую группу
-    const updatedGroup = getGroupById(groupId);
+    const updatedGroup = await getGroupById(groupId);
 
     return NextResponse.json({ 
       message: 'Successfully joined group',
@@ -61,6 +60,3 @@ export async function POST(
     );
   }
 }
-
-
-

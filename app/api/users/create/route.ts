@@ -14,13 +14,13 @@ export async function POST(request: NextRequest) {
     }
 
     // Проверяем, не существует ли уже такой пользователь
-    const existingUser = getUserByTelegramId(Number(telegramId));
+    const existingUser = await getUserByTelegramId(Number(telegramId));
     if (existingUser) {
       return NextResponse.json({ user: existingUser });
     }
 
     // Создаём нового пользователя
-    const user = createUser(
+    const user = await createUser(
       Number(telegramId),
       firstName,
       lastName || undefined,
@@ -36,6 +36,3 @@ export async function POST(request: NextRequest) {
     );
   }
 }
-
-
-

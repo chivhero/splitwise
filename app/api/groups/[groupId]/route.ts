@@ -6,7 +6,7 @@ export async function GET(
   { params }: { params: { groupId: string } }
 ) {
   try {
-    const group = getGroupById(params.groupId);
+    const group = await getGroupById(params.groupId);
 
     if (!group) {
       return NextResponse.json(

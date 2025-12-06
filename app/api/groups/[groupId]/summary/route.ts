@@ -7,7 +7,7 @@ export async function GET(
   { params }: { params: { groupId: string } }
 ) {
   try {
-    const group = getGroupById(params.groupId);
+    const group = await getGroupById(params.groupId);
     if (!group) {
       return NextResponse.json(
         { error: 'Group not found' },
@@ -15,7 +15,7 @@ export async function GET(
       );
     }
 
-    const expenses = getGroupExpenses(params.groupId);
+    const expenses = await getGroupExpenses(params.groupId);
     const members = group.members.map((m: any) => m.user!);
     const summary = getGroupSummary(expenses, members);
 
@@ -28,13 +28,3 @@ export async function GET(
     );
   }
 }
-
-
-
-
-
-
-
-
-
-

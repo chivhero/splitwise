@@ -15,11 +15,11 @@ export async function POST(request: NextRequest) {
     }
 
     // Проверяем, существует ли пользователь
-    let user = getUserByTelegramId(telegramUser.id);
+    let user = await getUserByTelegramId(telegramUser.id);
 
     // Если нет - создаём
     if (!user) {
-      user = createUser(
+      user = await createUser(
         telegramUser.id,
         telegramUser.first_name,
         telegramUser.last_name,
@@ -37,13 +37,3 @@ export async function POST(request: NextRequest) {
     );
   }
 }
-
-
-
-
-
-
-
-
-
-

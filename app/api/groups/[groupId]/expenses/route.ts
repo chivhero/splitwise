@@ -6,7 +6,7 @@ export async function GET(
   { params }: { params: { groupId: string } }
 ) {
   try {
-    const expenses = getGroupExpenses(params.groupId);
+    const expenses = await getGroupExpenses(params.groupId);
     return NextResponse.json({ expenses });
   } catch (error) {
     console.error('Get expenses error:', error);
@@ -32,7 +32,7 @@ export async function POST(
       );
     }
 
-    const user = getUserByTelegramId(Number(telegramId));
+    const user = await getUserByTelegramId(Number(telegramId));
     if (!user) {
       return NextResponse.json(
         { error: 'User not found' },
@@ -40,7 +40,7 @@ export async function POST(
       );
     }
 
-    const group = getGroupById(params.groupId);
+    const group = await getGroupById(params.groupId);
     if (!group) {
       return NextResponse.json(
         { error: 'Group not found' },
@@ -50,7 +50,7 @@ export async function POST(
 
     // Проверяем лимиты для бесплатного плана
     if (!user.isPremium) {
-      const existingExpenses = getGroupExpenses(params.groupId);
+      const existingExpenses = await getGroupExpenses(params.groupId);
       if (existingExpenses.length >= 50) {
         return NextResponse.json(
           { error: 'Free plan allows only 50 expenses per group. Upgrade to Premium!' },
@@ -59,7 +59,7 @@ export async function POST(
       }
     }
 
-    const paidByUser = getUserByTelegramId(Number(paidByTelegramId));
+    const paidByUser = await getUserByTelegramId(Number(paidByTelegramId));
     if (!paidByUser) {
       return NextResponse.json(
         { error: 'Paid by user not found' },
@@ -70,13 +70,13 @@ export async function POST(
     // Конвертируем telegram IDs в user IDs
     const splitBetweenUserIds: string[] = [];
     for (const tgId of splitBetweenTelegramIds) {
-      const member = getUserByTelegramId(Number(tgId));
+      const member = await getUserByTelegramId(Number(tgId));
       if (member) {
         splitBetweenUserIds.push(member.id);
       }
     }
 
-    const expense = createExpense(
+    const expense = await createExpense(
       params.groupId,
       description,
       Number(amount),
@@ -97,13 +97,3 @@ export async function POST(
     );
   }
 }
-
-
-
-
-
-
-
-
-
-

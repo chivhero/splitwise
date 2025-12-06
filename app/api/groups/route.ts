@@ -14,13 +14,13 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    let user = getUserByTelegramId(Number(telegramId));
+    let user = await getUserByTelegramId(Number(telegramId));
     if (!user) {
       // Автоматически создаём пользователя для разработки
-      user = createUser(Number(telegramId), 'Test User', 'Developer', 'testuser');
+      user = await createUser(Number(telegramId), 'Test User', 'Developer', 'testuser');
     }
 
-    const groups = getUserGroups(user.id);
+    const groups = await getUserGroups(user.id);
     return NextResponse.json({ groups });
   } catch (error) {
     console.error('Get groups error:', error);
@@ -44,15 +44,15 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    let user = getUserByTelegramId(Number(telegramId));
+    let user = await getUserByTelegramId(Number(telegramId));
     if (!user) {
       // Автоматически создаём пользователя для разработки
-      user = createUser(Number(telegramId), 'Test User', 'Developer', 'testuser');
+      user = await createUser(Number(telegramId), 'Test User', 'Developer', 'testuser');
     }
 
     // Проверка лимита групп для бесплатных пользователей
     if (!user.isPremium) {
-      const userGroups = getUserGroups(user.id);
+      const userGroups = await getUserGroups(user.id);
       const FREE_GROUPS_LIMIT = 5;
       
       if (userGroups.length >= FREE_GROUPS_LIMIT) {
@@ -69,14 +69,14 @@ export async function POST(request: NextRequest) {
       }
     }
     
-    const group = createGroup(name, user.id, description, currency || 'USD');
+    const group = await createGroup(name, user.id, description, currency || 'USD');
 
     // Добавляем дополнительных участников
     if (memberTelegramIds && Array.isArray(memberTelegramIds)) {
       for (const memberId of memberTelegramIds) {
-        const member = getUserByTelegramId(Number(memberId));
+        const member = await getUserByTelegramId(Number(memberId));
         if (member && member.id !== user.id) {
-          addGroupMember(group.id, member.id);
+          await addGroupMember(group.id, member.id);
         }
       }
     }
