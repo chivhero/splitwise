@@ -47,7 +47,7 @@ export default function SettlementsView({ groupId, group }: SettlementsViewProps
     if (locale === 'ru') {
       const lastDigit = count % 10;
       const lastTwoDigits = count % 100;
-      
+
       if (lastTwoDigits >= 11 && lastTwoDigits <= 14) {
         return `${count} расходов`;
       }

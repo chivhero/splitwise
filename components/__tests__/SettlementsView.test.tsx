@@ -2,6 +2,7 @@ import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import SettlementsView from '../SettlementsView';
 import { Group } from '@/types';
+import { LanguageProvider } from '@/contexts/LanguageContext';
 
 // Mock fetch API
 global.fetch = jest.fn();
@@ -38,7 +39,11 @@ describe('SettlementsView', () => {
   it('должен показывать загрузку', () => {
     (global.fetch as jest.Mock).mockImplementation(() => new Promise(() => {}));
     
-    render(<SettlementsView groupId="group1" group={mockGroup} />);
+    render(
+      <LanguageProvider>
+        <SettlementsView groupId="group1" group={mockGroup} />
+      </LanguageProvider>
+    );
     
     // Проверяем наличие спиннера загрузки
     const spinner = document.querySelector('.animate-spin');
@@ -48,7 +53,11 @@ describe('SettlementsView', () => {
   it('должен показывать сообщение об ошибке при неудачной загрузке', async () => {
     (global.fetch as jest.Mock).mockRejectedValue(new Error('Network error'));
     
-    render(<SettlementsView groupId="group1" group={mockGroup} />);
+    render(
+      <LanguageProvider>
+        <SettlementsView groupId="group1" group={mockGroup} />
+      </LanguageProvider>
+    );
     
     await waitFor(() => {
       expect(screen.getByText('Не удалось загрузить данные')).toBeInTheDocument();
@@ -67,7 +76,11 @@ describe('SettlementsView', () => {
       }),
     });
     
-    render(<SettlementsView groupId="group1" group={mockGroup} />);
+    render(
+      <LanguageProvider>
+        <SettlementsView groupId="group1" group={mockGroup} />
+      </LanguageProvider>
+    );
     
     await waitFor(() => {
       expect(screen.getByText('Нет расходов')).toBeInTheDocument();
@@ -92,12 +105,16 @@ describe('SettlementsView', () => {
       }),
     });
     
-    render(<SettlementsView groupId="group1" group={mockGroup} />);
+    render(
+      <LanguageProvider>
+        <SettlementsView groupId="group1" group={mockGroup} />
+      </LanguageProvider>
+    );
     
     await waitFor(() => {
       // Проверяем общую сумму
       expect(screen.getByText(/450\.00/)).toBeInTheDocument();
-      expect(screen.getByText('2 расходов')).toBeInTheDocument();
+      expect(screen.getByText('2 расхода')).toBeInTheDocument();
       
       // Проверяем переводы
       expect(screen.getByText('Необходимые переводы (1)')).toBeInTheDocument();
@@ -121,7 +138,11 @@ describe('SettlementsView', () => {
       }),
     });
     
-    render(<SettlementsView groupId="group1" group={mockGroup} />);
+    render(
+      <LanguageProvider>
+        <SettlementsView groupId="group1" group={mockGroup} />
+      </LanguageProvider>
+    );
     
     await waitFor(() => {
       expect(screen.getByText('Все расчёты завершены! 🎉')).toBeInTheDocument();
@@ -146,7 +167,11 @@ describe('SettlementsView', () => {
       }),
     });
     
-    render(<SettlementsView groupId="group1" group={mockGroup} />);
+    render(
+      <LanguageProvider>
+        <SettlementsView groupId="group1" group={mockGroup} />
+      </LanguageProvider>
+    );
     
     await waitFor(() => {
       expect(screen.getByText('Баланс участников')).toBeInTheDocument();
@@ -158,13 +183,21 @@ describe('SettlementsView', () => {
   });
 
   it('должен перезагружать данные при изменении groupId', async () => {
-    const { rerender } = render(<SettlementsView groupId="group1" group={mockGroup} />);
+    const { rerender } = render(
+      <LanguageProvider>
+        <SettlementsView groupId="group1" group={mockGroup} />
+      </LanguageProvider>
+    );
     
     await waitFor(() => {
       expect(global.fetch).toHaveBeenCalledWith('/api/groups/group1/summary');
     });
 
-    rerender(<SettlementsView groupId="group2" group={mockGroup} />);
+    rerender(
+      <LanguageProvider>
+        <SettlementsView groupId="group2" group={mockGroup} />
+      </LanguageProvider>
+    );
     
     await waitFor(() => {
       expect(global.fetch).toHaveBeenCalledWith('/api/groups/group2/summary');

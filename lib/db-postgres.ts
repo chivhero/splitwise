@@ -9,10 +9,13 @@ import { User, Group, GroupMember, Expense } from '@/types';
 
 export async function initDB() {
   try {
+    // Enable pgcrypto for UUID generation
+    await sql`CREATE EXTENSION IF NOT EXISTS "pgcrypto"`;
+
     // Users table
     await sql`
       CREATE TABLE IF NOT EXISTS users (
-        id TEXT PRIMARY KEY,
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
         telegram_id INTEGER UNIQUE NOT NULL,
         first_name TEXT NOT NULL,
         last_name TEXT,
@@ -31,7 +34,7 @@ export async function initDB() {
         name TEXT NOT NULL,
         description TEXT,
         currency TEXT DEFAULT 'USD',
-        created_by TEXT NOT NULL,
+        created_by UUID NOT NULL,
         created_at TIMESTAMP NOT NULL DEFAULT NOW(),
         FOREIGN KEY (created_by) REFERENCES users(id)
       )
@@ -40,7 +43,7 @@ export async function initDB() {
     // Group members table
     await sql`
       CREATE TABLE IF NOT EXISTS group_members (
-        user_id TEXT NOT NULL,
+        user_id UUID NOT NULL,
         group_id TEXT NOT NULL,
         role TEXT DEFAULT 'member',
         joined_at TIMESTAMP NOT NULL DEFAULT NOW(),
@@ -58,10 +61,10 @@ export async function initDB() {
         description TEXT NOT NULL,
         amount DECIMAL(10, 2) NOT NULL,
         currency TEXT DEFAULT 'USD',
-        paid_by TEXT NOT NULL,
+        paid_by UUID NOT NULL,
         split_between JSONB NOT NULL,
         date TIMESTAMP NOT NULL,
-        created_by TEXT NOT NULL,
+        created_by UUID NOT NULL,
         created_at TIMESTAMP NOT NULL DEFAULT NOW(),
         category TEXT,
         FOREIGN KEY (group_id) REFERENCES groups(id) ON DELETE CASCADE,
@@ -93,17 +96,15 @@ export async function createUser(
   username?: string,
   photoUrl?: string
 ): Promise<User> {
-  const id = `user_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-  
   const result = await sql`
-    INSERT INTO users (id, telegram_id, first_name, last_name, username, photo_url, created_at)
-    VALUES (${id}, ${telegramId}, ${firstName}, ${lastName || null}, ${username || null}, ${photoUrl || null}, NOW())
+    INSERT INTO users (telegram_id, first_name, last_name, username, photo_url)
+    VALUES (${telegramId}, ${firstName}, ${lastName || null}, ${username || null}, ${photoUrl || null})
     ON CONFLICT (telegram_id) 
     DO UPDATE SET 
-      first_name = ${firstName},
-      last_name = ${lastName || null},
-      username = ${username || null},
-      photo_url = ${photoUrl || null}
+      first_name = EXCLUDED.first_name,
+      last_name = EXCLUDED.last_name,
+      username = EXCLUDED.username,
+      photo_url = EXCLUDED.photo_url
     RETURNING *
   `;
 
