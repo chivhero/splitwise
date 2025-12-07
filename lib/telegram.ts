@@ -49,6 +49,7 @@ declare global {
         showAlert: (message: string, callback?: () => void) => void;
         showConfirm: (message: string, callback?: (confirmed: boolean) => void) => void;
         openInvoice: (url: string, callback?: (status: string) => void) => void;
+        switchInlineQuery: (query: string, choose_chat_types?: Array<'users' | 'bots' | 'groups' | 'channels'>) => void;
         themeParams: {
           bg_color?: string;
           text_color?: string;
@@ -150,37 +151,22 @@ export function confirmTelegramAction(message: string, callback: (confirmed: boo
   }
 }
 
-import { sendMessage } from './bot';
-
 // Share group link
-export function shareGroupLink(groupId: string, groupName: string, inviteLink: string) {
-  const text = `🎉 <b>Присоединяйся к группе "${groupName}"!</b>\n\nНажми на кнопку ниже, чтобы принять приглашение.`;
-
+export function shareGroupLink(groupId: string) {
   const webApp = getTelegramWebApp();
-  if (webApp && webApp.initDataUnsafe.user) {
-    const chatId = webApp.initDataUnsafe.user.id;
-
-    sendMessage(chatId, text, {
-      parse_mode: 'HTML',
-      reply_markup: {
-        inline_keyboard: [
-          [{ text: '🚀 Принять приглашение', url: inviteLink }]
-        ]
-      }
-    })
-    .then(data => {
-      if (data.ok) {
-        showTelegramPopup('Приглашение отправлено в ваш чат с ботом!');
-      } else {
-        showTelegramPopup(`Ошибка: ${data.description}`);
-      }
-    })
-    .catch(() => showTelegramPopup('Не удалось отправить приглашение.'));
-
+  if (webApp && webApp.switchInlineQuery) {
+    try {
+      webApp.switchInlineQuery(`join_group_${groupId}`, ['users', 'groups', 'channels']);
+    } catch (e) {
+      console.error('Error calling switchInlineQuery:', e);
+      showTelegramPopup('Не удалось открыть окно выбора чата. Возможно, ваша версия Telegram устарела.');
+    }
   } else {
-    // Fallback для браузера
-    navigator.clipboard.writeText(inviteLink);
-    alert('Ссылка-приглашение скопирована в буфер обмена!');
+    // Fallback for older Telegram versions or non-Telegram environments
+    const botUsername = process.env.NEXT_PUBLIC_TELEGRAM_BOT_USERNAME || 'SplitWisedbot';
+    const url = `https://t.me/${botUsername}?startapp=join_${groupId}`;
+    navigator.clipboard.writeText(url);
+    showTelegramPopup('Ссылка-приглашение скопирована! Теперь вы можете вставить ее в любой чат.');
   }
 }
 

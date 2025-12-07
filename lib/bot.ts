@@ -35,3 +35,32 @@ export async function sendMessage(chatId: number | string, text: string, options
     throw error;
   }
 }
+
+export async function answerInlineQuery(inlineQueryId: string, results: any[]) {
+  const url = `${BASE_URL}/answerInlineQuery`;
+  const payload = {
+    inline_query_id: inlineQueryId,
+    results,
+  };
+
+  try {
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(payload),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      console.error('Telegram API Error:', errorData);
+      throw new Error(`Telegram API error: ${errorData.description}`);
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error('Failed to answer inline query:', error);
+    throw error;
+  }
+}
