@@ -79,7 +79,9 @@ export default function GroupPage() {
   };
 
   const handleShareLink = () => {
-    shareGroupLink(groupId, group?.name || 'Group');
+    // In a real app, this link would come from your backend/group data
+    const inviteLink = `https://t.me/your_bot_name?start=join_group_${groupId}`;
+    shareGroupLink(groupId, group?.name || 'Group', inviteLink);
   };
 
   if (loading) {

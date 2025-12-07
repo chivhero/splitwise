@@ -71,7 +71,22 @@ export function getTelegramWebApp() {
 
 export function getTelegramUser(): TelegramUser | null {
   const webApp = getTelegramWebApp();
-  return webApp?.initDataUnsafe?.user || null;
+  if (webApp?.initDataUnsafe?.user) {
+    return webApp.initDataUnsafe.user;
+  }
+
+  if (typeof window !== 'undefined') {
+    const cookie = document.cookie.split('; ').find(row => row.startsWith('telegram_user='));
+    if (cookie) {
+      try {
+        return JSON.parse(decodeURIComponent(cookie.split('=')[1]));
+      } catch (e) {
+        return null;
+      }
+    }
+  }
+
+  return null;
 }
 
 export function isTelegramWebApp(): boolean {
@@ -135,21 +150,37 @@ export function confirmTelegramAction(message: string, callback: (confirmed: boo
   }
 }
 
+import { sendMessage } from './bot';
+
 // Share group link
-export function shareGroupLink(groupId: string, groupName: string) {
-  const botUsername = process.env.NEXT_PUBLIC_TELEGRAM_BOT_USERNAME || 'SplitWisedbot';
-  const url = `https://t.me/${botUsername}?startapp=join_${groupId}`;
-  const text = `🎉 Присоединяйся к группе "${groupName}" для разделения расходов!`;
-  
+export function shareGroupLink(groupId: string, groupName: string, inviteLink: string) {
+  const text = `🎉 <b>Присоединяйся к группе "${groupName}"!</b>\n\nНажми на кнопку ниже, чтобы принять приглашение.`;
+
   const webApp = getTelegramWebApp();
-  if (webApp) {
-    // Используем Telegram share API
-    const shareUrl = `https://t.me/share/url?url=${encodeURIComponent(url)}&text=${encodeURIComponent(text)}`;
-    window.open(shareUrl, '_blank');
+  if (webApp && webApp.initDataUnsafe.user) {
+    const chatId = webApp.initDataUnsafe.user.id;
+
+    sendMessage(chatId, text, {
+      parse_mode: 'HTML',
+      reply_markup: {
+        inline_keyboard: [
+          [{ text: '🚀 Принять приглашение', url: inviteLink }]
+        ]
+      }
+    })
+    .then(data => {
+      if (data.ok) {
+        showTelegramPopup('Приглашение отправлено в ваш чат с ботом!');
+      } else {
+        showTelegramPopup(`Ошибка: ${data.description}`);
+      }
+    })
+    .catch(() => showTelegramPopup('Не удалось отправить приглашение.'));
+
   } else {
     // Fallback для браузера
-    navigator.clipboard.writeText(url);
-    alert('Ссылка скопирована в буфер обмена!');
+    navigator.clipboard.writeText(inviteLink);
+    alert('Ссылка-приглашение скопирована в буфер обмена!');
   }
 }
 

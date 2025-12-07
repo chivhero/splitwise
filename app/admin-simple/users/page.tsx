@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { getTelegramUser } from '@/lib/telegram';
 import { Users, ArrowLeft, Crown, Copy, Check } from 'lucide-react';
 import Link from 'next/link';
@@ -25,27 +25,7 @@ export default function AdminUsersPage() {
   const [error, setError] = useState<string | null>(null);
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
-  useEffect(() => {
-    console.log('[Admin Users] Checking admin access...');
-    const tgUser = getTelegramUser();
-    console.log('[Admin Users] Telegram user:', tgUser);
-    
-    const userId = tgUser?.id;
-    console.log('[Admin Users] User ID:', userId);
-    console.log('[Admin Users] Admin IDs:', ADMIN_IDS);
-    
-    if (!userId || !ADMIN_IDS.includes(userId)) {
-      console.error('[Admin Users] Access denied!');
-      window.location.href = '/';
-      return;
-    }
-    
-    console.log('[Admin Users] Access granted! Loading users...');
-    setAdminId(userId);
-    loadUsers(userId);
-  }, []);
-
-  const loadUsers = async (adminTelegramId: number) => {
+  const loadUsers = useCallback(async (adminTelegramId: number) => {
     try {
       setLoading(true);
       console.log('[Admin Users] Fetching users for admin:', adminTelegramId);
@@ -73,7 +53,43 @@ export default function AdminUsersPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    const checkAccessAndLoad = () => {
+      console.log('[Admin Users] Checking admin access...');
+      const tgUser = getTelegramUser();
+      console.log('[Admin Users] Telegram user:', tgUser);
+
+      if (!tgUser) {
+        setTimeout(checkAccessAndLoad, 100);
+        return;
+      }
+
+      const userId = tgUser.id;
+      console.log('[Admin Users] User ID:', userId);
+      console.log('[Admin Users] Admin IDs:', ADMIN_IDS);
+
+      const isSuperAdmin = ADMIN_IDS.includes(userId);
+      const hasAdminAccess = tgUser.isAdmin || isSuperAdmin;
+
+      console.log('[Admin Users] Is Super Admin:', isSuperAdmin);
+      console.log('[Admin Users] Has Admin Access:', hasAdminAccess);
+
+      if (!hasAdminAccess) {
+        console.error('[Admin Users] Access denied!');
+        setError('Access Denied. You are not authorized to view this page.');
+        setLoading(false);
+        return;
+      }
+
+      console.log('[Admin Users] Access granted! Loading users...');
+      setAdminId(tgUser.telegramId);
+      loadUsers(tgUser.telegramId);
+    };
+
+    checkAccessAndLoad();
+  }, [loadUsers]);
 
   const copyUserId = (userId: string) => {
     navigator.clipboard.writeText(userId);
@@ -81,7 +97,7 @@ export default function AdminUsersPage() {
     setTimeout(() => setCopiedId(null), 2000);
   };
 
-  if (!adminId) {
+  if (adminId === null) {
     return null;
   }
 

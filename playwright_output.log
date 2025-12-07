@@ -1,0 +1,90 @@
+[2m[WebServer] [22mnpm warn Unknown env config "metrics-registry". This will stop working in the next major version of npm.
+[2m[WebServer] [22mnpm warn Unknown env config "globalignorefile". This will stop working in the next major version of npm.
+📊 Database mode: SQLite (Development)
+✅ Using SQLite database
+
+Running 1 test using 1 worker
+
+📊 Database mode: SQLite (Development)
+✅ Using SQLite database
+PAGE LOG: %cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold
+PAGE LOG: [Telegram.WebView] > postEvent web_app_set_header_color {color_key: bg_color}
+PAGE LOG: [Telegram.WebView] > postEvent web_app_set_bottom_bar_color {color: #ffffff}
+PAGE LOG: [Telegram.WebView] > postEvent web_app_request_theme
+PAGE LOG: [Telegram.WebView] > postEvent web_app_request_viewport
+PAGE LOG: [Telegram.WebView] > postEvent web_app_request_safe_area
+PAGE LOG: [Telegram.WebView] > postEvent web_app_request_content_safe_area
+Current URL: http://localhost:3000/admin-simple/users
+PAGE LOG: Warning: Extra attributes from the server: %s%s style
+    at html
+    at RootLayout (Server)
+    at RedirectErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/redirect-boundary.js:74:9)
+    at RedirectBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/redirect-boundary.js:82:11)
+    at NotFoundErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/not-found-boundary.js:76:9)
+    at NotFoundBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/not-found-boundary.js:84:11)
+    at DevRootNotFoundBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/dev-root-not-found-boundary.js:33:11)
+    at ReactDevOverlay (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/react-dev-overlay/app/ReactDevOverlay.js:87:9)
+    at HotReload (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/react-dev-overlay/app/hot-reloader-client.js:321:11)
+    at Router (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/app-router.js:207:11)
+    at ErrorBoundaryHandler (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/error-boundary.js:113:9)
+    at ErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/error-boundary.js:160:11)
+    at AppRouter (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/app-router.js:585:13)
+    at ServerRoot (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/app-index.js:112:27)
+    at Root (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/app-index.js:117:11)
+PAGE LOG: [Admin Users] Checking admin access...
+PAGE LOG: [Admin Users] Telegram user: {id: user_1765125325583_fjnfer63v, telegramId: 123456789, firstName: Test, lastName: User, username: testuser}
+PAGE LOG: [Admin Users] User ID: user_1765125325583_fjnfer63v
+PAGE LOG: [Admin Users] Admin IDs: [409627169, 123456789]
+PAGE LOG: [Admin Users] Is Super Admin: false
+PAGE LOG: [Admin Users] Has Admin Access: true
+PAGE LOG: [Admin Users] Access granted! Loading users...
+PAGE LOG: [Admin Users] Fetching users for admin: 123456789
+PAGE LOG: [Admin Users] URL: /api/admin-simple/users?adminTelegramId=123456789
+PAGE LOG: [Admin Users] Checking admin access...
+PAGE LOG: [Admin Users] Telegram user: {id: user_1765125325583_fjnfer63v, telegramId: 123456789, firstName: Test, lastName: User, username: testuser}
+PAGE LOG: [Admin Users] User ID: user_1765125325583_fjnfer63v
+PAGE LOG: [Admin Users] Admin IDs: [409627169, 123456789]
+PAGE LOG: [Admin Users] Is Super Admin: false
+PAGE LOG: [Admin Users] Has Admin Access: true
+PAGE LOG: [Admin Users] Access granted! Loading users...
+PAGE LOG: [Admin Users] Fetching users for admin: 123456789
+PAGE LOG: [Admin Users] URL: /api/admin-simple/users?adminTelegramId=123456789
+PAGE LOG: [TelegramProvider] Checking Telegram WebApp...
+PAGE LOG: [TelegramProvider] window.Telegram: {WebView: Object, Utils: Object, WebApp: Object}
+PAGE LOG: [TelegramProvider] Telegram WebApp detected!
+PAGE LOG: [Telegram.WebView] > postEvent web_app_ready
+PAGE LOG: [Telegram.WebView] > postEvent web_app_expand
+PAGE LOG: [TelegramProvider] Telegram WebApp initialized
+PAGE LOG: [TelegramProvider] Telegram user: {id: user_1765125325583_fjnfer63v, telegramId: 123456789, firstName: Test, lastName: User, username: testuser}
+PAGE LOG: [TelegramProvider] Auth success: {user: Object}
+PAGE LOG: [Admin Users] Response status: 200
+PAGE LOG: [Admin Users] Data: {users: Array(4)}
+PAGE LOG: [Admin Users] Users count: 4
+PAGE LOG: [Admin Users] Response status: 200
+PAGE LOG: [Admin Users] Data: {users: Array(4)}
+PAGE LOG: [Admin Users] Users count: 4
+  ✘  1 e2e/admin-dashboard.spec.ts:5:5 › Admin dashboard should display users (1.0m)
+
+
+  1) e2e/admin-dashboard.spec.ts:5:5 › Admin dashboard should display users ────────────────────────
+
+    [31mTest timeout of 60000ms exceeded.[39m
+
+    Error: page.waitForSelector: Test timeout of 60000ms exceeded.
+    Call log:
+    [2m  - waiting for locator('h1:has-text("Админ-панель")') to be visible[22m
+
+
+      40 |
+      41 |   // Wait for the main heading
+    > 42 |   await page.waitForSelector('h1:has-text("Админ-панель")');
+         |              ^
+      43 |
+      44 |   // Wait for the user to appear in the list
+      45 |   await page.waitForSelector('text=Test User');
+        at /app/e2e/admin-dashboard.spec.ts:42:14
+
+    Error Context: ../home/jules/verification/playwright-report/admin-dashboard-Admin-dashboard-should-display-users/error-context.md
+
+  1 failed
+    e2e/admin-dashboard.spec.ts:5:5 › Admin dashboard should display users ─────────────────────────

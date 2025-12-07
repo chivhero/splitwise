@@ -20,7 +20,8 @@ export async function GET(request: NextRequest) {
     console.log('👤 [Users API] Admin request from:', adminTelegramId);
     
     // Проверка админа
-    if (!adminTelegramId || !ADMIN_IDS.includes(Number(adminTelegramId))) {
+    const numericAdminId = Number(adminTelegramId);
+    if (!adminTelegramId || isNaN(numericAdminId) || !ADMIN_IDS.includes(numericAdminId)) {
       console.warn('⛔ [Users API] Access denied for:', adminTelegramId);
       return NextResponse.json(
         { error: 'Access denied' },

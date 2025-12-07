@@ -33,9 +33,13 @@ export async function POST(request: NextRequest) {
     // Если нет - создаём
     if (!user) {
       console.log('➕ Creating new user:', telegramUser.id);
+
+      // Обеспечиваем наличие first_name
+      const firstName = telegramUser.first_name || telegramUser.username || `User ${telegramUser.id}`;
+
       user = await createUser(
         telegramUser.id,
-        telegramUser.first_name,
+        firstName,
         telegramUser.last_name,
         telegramUser.username,
         telegramUser.photo_url
