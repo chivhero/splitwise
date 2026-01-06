@@ -57,20 +57,20 @@ export default function ExpenseList({ expenses, group }: ExpenseListProps) {
           <div className="flex items-start gap-3">
             <div className="text-2xl">{getCategoryEmoji(expense.category)}</div>
             <div className="flex-1">
-              <h3 className="font-semibold mb-1 text-purple-900">{expense.description}</h3>
-              <p className="text-sm text-purple-600 mb-2">
+              <h3 className="font-semibold mb-1 text-white">{expense.description}</h3>
+              <p className="text-sm text-white/70 mb-2">
                 {t('expenses.paidByName', { name: getUserName(expense.paidBy) })}
               </p>
               <div className="flex items-center justify-between">
-                <span className="text-xs text-purple-500">
+                <span className="text-xs text-white/60">
                   {format(new Date(expense.date), 'd MMMM, HH:mm', { locale: locale === 'ru' ? ru : enUS })}
                 </span>
-                <span className="font-bold text-lg bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent">
+                <span className="font-bold text-lg text-white">
                   {expense.amount.toFixed(2)} {expense.currency}
                 </span>
               </div>
               {expense.splitBetween.length > 1 && (
-                <p className="text-xs text-purple-500 mt-1">
+                <p className="text-xs text-white/60 mt-1">
                   {getSplitBetweenText(expense.splitBetween.length)}
                 </p>
               )}

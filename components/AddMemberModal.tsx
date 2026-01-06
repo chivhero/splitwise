@@ -72,22 +72,22 @@ export default function AddMemberModal({ groupId, onClose, onMemberAdded }: AddM
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-end justify-center z-50 animate-fade-in">
-      <div className="bg-white w-full max-w-lg rounded-t-3xl p-6 animate-slide-up">
+    <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-end justify-center z-50 animate-fade-in">
+      <div className="bg-black/30 backdrop-blur-xl border border-white/10 w-full max-w-lg rounded-t-3xl p-6 animate-slide-up">
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-xl font-bold text-purple-900">{t('addMember.title')}</h2>
+          <h2 className="text-xl font-bold text-white">{t('addMember.title')}</h2>
           <button
             onClick={onClose}
-            className="text-gray-400 hover:text-gray-600 transition-colors"
+            className="text-white/60 hover:text-white transition-colors"
           >
             <X size={24} />
           </button>
         </div>
 
         {/* Info Banner */}
-        <div className="bg-purple-50 border border-purple-200 rounded-xl p-3 mb-4">
-          <p className="text-sm text-purple-700">
+        <div className="bg-white/5 border border-white/10 rounded-xl p-3 mb-4">
+          <p className="text-sm text-white/80">
             💡 <strong>{t('addMember.devMode')}:</strong> {t('addMember.devModeDescription')}
           </p>
         </div>
@@ -95,13 +95,13 @@ export default function AddMemberModal({ groupId, onClose, onMemberAdded }: AddM
         {/* Form */}
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium mb-2">{t('addMember.firstName')} *</label>
+            <label className="block text-sm font-medium mb-2 text-white/80">{t('addMember.firstName')} *</label>
             <input
               type="text"
               value={firstName}
               onChange={(e) => setFirstName(e.target.value)}
               placeholder={t('addMember.firstNamePlaceholder')}
-              className="input"
+              className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-white/20 transition-all"
               maxLength={50}
               disabled={loading}
               autoFocus
@@ -109,13 +109,13 @@ export default function AddMemberModal({ groupId, onClose, onMemberAdded }: AddM
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-2">{t('addMember.lastName')}</label>
+            <label className="block text-sm font-medium mb-2 text-white/80">{t('addMember.lastName')}</label>
             <input
               type="text"
               value={lastName}
               onChange={(e) => setLastName(e.target.value)}
               placeholder={t('addMember.lastNamePlaceholder')}
-              className="input"
+              className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-white/20 transition-all"
               maxLength={50}
               disabled={loading}
             />
@@ -126,14 +126,14 @@ export default function AddMemberModal({ groupId, onClose, onMemberAdded }: AddM
             <button
               type="button"
               onClick={onClose}
-              className="btn-secondary flex-1"
+              className="flex-1 px-6 py-3 rounded-xl bg-white/5 border border-white/10 text-white hover:bg-white/10 transition-all"
               disabled={loading}
             >
               {t('common.cancel')}
             </button>
             <button
               type="submit"
-              className="btn-primary flex-1"
+              className="flex-1 px-6 py-3 rounded-xl bg-white/10 border border-white/20 text-white hover:bg-white/20 transition-all disabled:opacity-50"
               disabled={loading}
             >
               {loading ? t('addMember.adding') : t('expenses.add')}

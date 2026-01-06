@@ -66,14 +66,14 @@ export default function SettlementsView({ groupId, group }: SettlementsViewProps
   if (loading) {
     return (
       <div className="flex items-center justify-center py-12">
-        <div className="animate-spin rounded-full h-8 w-8 border-4 border-purple-500 border-t-transparent"></div>
+        <div className="animate-spin rounded-full h-8 w-8 border-4 border-white/20 border-t-white"></div>
       </div>
     );
   }
 
   if (!summary) {
     return (
-      <div className="text-center py-12 text-gray-600">
+      <div className="text-center py-12 text-white/60">
         {t('common.loadFailed')}
       </div>
     );
@@ -83,8 +83,8 @@ export default function SettlementsView({ groupId, group }: SettlementsViewProps
     return (
       <div className="text-center py-12">
         <div className="text-6xl mb-4">📊</div>
-        <h2 className="text-xl font-semibold mb-2">{t('settlements.noExpenses')}</h2>
-        <p className="text-gray-600">
+        <h2 className="text-xl font-semibold mb-2 text-white">{t('settlements.noExpenses')}</h2>
+        <p className="text-white/60">
           {t('settlements.addExpensesToSee')}
         </p>
       </div>
@@ -94,13 +94,13 @@ export default function SettlementsView({ groupId, group }: SettlementsViewProps
   return (
     <div className="space-y-6">
       {/* Summary Card */}
-      <div className="card bg-gradient-to-br from-purple-50 via-pink-50 to-indigo-50 border-purple-200 shadow-md">
+      <div className="card">
         <div className="text-center">
-          <p className="text-sm text-purple-600 mb-1">{t('settlements.totalSpent')}</p>
-          <p className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent mb-1">
+          <p className="text-sm text-white/70 mb-1">{t('settlements.totalSpent')}</p>
+          <p className="text-3xl font-bold text-white mb-1">
             {summary.totalAmount.toFixed(2)} {group.currency}
           </p>
-          <p className="text-xs text-purple-500">
+          <p className="text-xs text-white/60">
             {getExpensesCountText(summary.expensesCount)}
           </p>
         </div>
@@ -110,32 +110,32 @@ export default function SettlementsView({ groupId, group }: SettlementsViewProps
       {summary.settlements.length === 0 ? (
         <div className="card text-center py-8">
           <div className="text-5xl mb-3">
-            <CheckCircle size={48} className="inline text-green-500" />
+            <CheckCircle size={48} className="inline text-green-400" />
           </div>
-          <h3 className="text-lg font-semibold mb-2">{t('settlements.allSettled')}</h3>
-          <p className="text-gray-600 text-sm">
+          <h3 className="text-lg font-semibold mb-2 text-white">{t('settlements.allSettled')}</h3>
+          <p className="text-white/60 text-sm">
             {t('settlements.noDebts')}
           </p>
         </div>
       ) : (
         <div>
-          <h3 className="font-semibold mb-3 text-purple-700">
+          <h3 className="font-semibold mb-3 text-white/80">
             {t('settlements.necessaryTransfers')} ({summary.settlements.length})
           </h3>
           <div className="space-y-3">
             {summary.settlements.map((settlement, index) => (
-              <div key={index} className="card bg-white border-l-4 border-pink-400 shadow-md hover:shadow-lg transition-shadow">
+              <div key={index} className="card border-l-4 border-white/30 hover:border-white/50 transition-all">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3 flex-1">
-                    <div className="font-semibold text-purple-900">
+                    <div className="font-semibold text-white">
                       {getUserName(settlement.from)}
                     </div>
-                    <ArrowRight size={20} className="text-purple-400" />
-                    <div className="font-semibold text-purple-900">
+                    <ArrowRight size={20} className="text-white/60" />
+                    <div className="font-semibold text-white">
                       {getUserName(settlement.to)}
                     </div>
                   </div>
-                  <div className="font-bold text-pink-600 text-lg">
+                  <div className="font-bold text-white text-lg">
                     {settlement.amount.toFixed(2)} {group.currency}
                   </div>
                 </div>
@@ -147,19 +147,19 @@ export default function SettlementsView({ groupId, group }: SettlementsViewProps
 
       {/* Balances */}
       <div>
-        <h3 className="font-semibold mb-3 text-purple-700">{t('settlements.membersBalance')}</h3>
+        <h3 className="font-semibold mb-3 text-white/80">{t('settlements.membersBalance')}</h3>
         <div className="space-y-2">
           {summary.balances.map((balance) => (
             <div key={balance.userId} className="card">
               <div className="flex items-center justify-between">
-                <span className="font-medium text-purple-900">{getUserName(balance.userId)}</span>
+                <span className="font-medium text-white">{getUserName(balance.userId)}</span>
                 <span
                   className={`font-semibold ${
                     balance.balance > 0.01
-                      ? 'text-green-600'
+                      ? 'text-green-400'
                       : balance.balance < -0.01
-                      ? 'text-pink-600'
-                      : 'text-purple-600'
+                      ? 'text-red-400'
+                      : 'text-white'
                   }`}
                 >
                   {balance.balance > 0.01
@@ -171,10 +171,10 @@ export default function SettlementsView({ groupId, group }: SettlementsViewProps
                 </span>
               </div>
               {balance.balance > 0.01 && (
-                <p className="text-xs text-purple-500 mt-1">{t('settlements.owesYou')}</p>
+                <p className="text-xs text-white/60 mt-1">{t('settlements.owesYou')}</p>
               )}
               {balance.balance < -0.01 && (
-                <p className="text-xs text-purple-500 mt-1">{t('settlements.youOwe')}</p>
+                <p className="text-xs text-white/60 mt-1">{t('settlements.youOwe')}</p>
               )}
             </div>
           ))}

@@ -105,12 +105,12 @@ export default function AddExpenseModal({ telegramId, group, onClose, onExpenseA
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 animate-fade-in p-4">
-      <div className="bg-white w-full max-w-lg rounded-3xl shadow-2xl max-h-[90vh] flex flex-col">
+    <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 animate-fade-in p-4">
+      <div className="bg-black/30 backdrop-blur-xl border border-white/10 w-full max-w-lg rounded-3xl shadow-2xl max-h-[90vh] flex flex-col">
         {/* Header */}
-        <div className="flex items-center justify-between p-6 pb-4 border-b border-gray-100 flex-shrink-0">
-          <h2 className="text-xl font-bold">{t('expenses.add')}</h2>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
+        <div className="flex items-center justify-between p-6 pb-4 border-b border-white/10 flex-shrink-0">
+          <h2 className="text-xl font-bold text-white">{t('expenses.add')}</h2>
+          <button onClick={onClose} className="text-white/60 hover:text-white">
             <X size={24} />
           </button>
         </div>
@@ -118,20 +118,20 @@ export default function AddExpenseModal({ telegramId, group, onClose, onExpenseA
         {/* Form - scrollable */}
         <form onSubmit={handleSubmit} className="space-y-4 overflow-y-auto px-6 py-4 flex-1">
           <div>
-            <label className="block text-sm font-medium mb-2">{t('expenses.description')} *</label>
+            <label className="block text-sm font-medium mb-2 text-white/80">{t('expenses.description')} *</label>
             <input
               type="text"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               placeholder={t('expenses.descriptionPlaceholder')}
-              className="input"
+              className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-white/20 transition-all"
               maxLength={100}
               disabled={loading}
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-2">{t('expenses.amount')} ({group.currency}) *</label>
+            <label className="block text-sm font-medium mb-2 text-white/80">{t('expenses.amount')} ({group.currency}) *</label>
             <input
               type="number"
               value={amount}
@@ -139,13 +139,13 @@ export default function AddExpenseModal({ telegramId, group, onClose, onExpenseA
               placeholder="0.00"
               step="0.01"
               min="0"
-              className="input"
+              className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-white/20 transition-all"
               disabled={loading}
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-2">{t('expenses.category')}</label>
+            <label className="block text-sm font-medium mb-2 text-white/80">{t('expenses.category')}</label>
             <div className="grid grid-cols-3 gap-2">
               {categories.map((cat) => (
                 <button
@@ -155,22 +155,22 @@ export default function AddExpenseModal({ telegramId, group, onClose, onExpenseA
                     setCategory(cat.id);
                     hapticFeedback('light');
                   }}
-                  className={`p-3 rounded-xl border-2 text-sm transition-colors ${
+                  className={`p-3 rounded-xl border-2 text-sm transition-all ${
                     category === cat.id
-                      ? 'border-purple-500 bg-purple-50'
-                      : 'border-purple-200 hover:border-purple-300'
+                      ? 'border-white/40 bg-white/10'
+                      : 'border-white/10 hover:border-white/20 hover:bg-white/5'
                   }`}
                   disabled={loading}
                 >
                   <div className="text-2xl mb-1">{cat.emoji}</div>
-                  <div className="text-xs">{t(`expenses.categories.${cat.id}`)}</div>
+                  <div className="text-xs text-white/80">{t(`expenses.categories.${cat.id}`)}</div>
                 </button>
               ))}
             </div>
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-2">{t('expenses.paidByLabel')} *</label>
+            <label className="block text-sm font-medium mb-2 text-white/80">{t('expenses.paidByLabel')} *</label>
             <div className="space-y-2">
               {group.members.map((member) => {
                 const tgId = getMemberTgId(member);
@@ -185,16 +185,16 @@ export default function AddExpenseModal({ telegramId, group, onClose, onExpenseA
                       setPaidBy(tgId);
                       hapticFeedback('light');
                     }}
-                    className={`w-full p-3 rounded-xl border-2 text-left transition-colors ${
+                    className={`w-full p-3 rounded-xl border-2 text-left transition-all ${
                       isSelected
-                        ? 'border-purple-500 bg-purple-50 font-semibold'
-                        : 'border-purple-200 hover:border-purple-300'
+                        ? 'border-white/40 bg-white/10 font-semibold'
+                        : 'border-white/10 hover:border-white/20 hover:bg-white/5'
                     }`}
                     disabled={loading}
                   >
                     <div className="flex items-center justify-between">
-                      <span>{memberName}</span>
-                      {isSelected && <span className="text-purple-600 text-xl">✓</span>}
+                      <span className="text-white">{memberName}</span>
+                      {isSelected && <span className="text-white text-xl">✓</span>}
                     </div>
                   </button>
                 );
@@ -203,7 +203,7 @@ export default function AddExpenseModal({ telegramId, group, onClose, onExpenseA
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-2">
+            <label className="block text-sm font-medium mb-2 text-white/80">
               {t('expenses.splitBetweenLabel')} *
             </label>
             <div className="space-y-2">
@@ -215,17 +215,17 @@ export default function AddExpenseModal({ telegramId, group, onClose, onExpenseA
                     key={member.userId}
                     type="button"
                     onClick={() => toggleMember(tgId)}
-                    className={`w-full p-3 rounded-xl border-2 text-left transition-colors ${
+                    className={`w-full p-3 rounded-xl border-2 text-left transition-all ${
                       isSelected
-                        ? 'border-purple-500 bg-purple-50'
-                        : 'border-purple-200 hover:border-purple-300'
+                        ? 'border-white/40 bg-white/10'
+                        : 'border-white/10 hover:border-white/20 hover:bg-white/5'
                     }`}
                     disabled={loading}
                   >
                     <div className="flex items-center justify-between">
-                      <span>{getMemberName(member)}</span>
+                      <span className="text-white">{getMemberName(member)}</span>
                       {isSelected && (
-                        <span className="text-purple-600">✓</span>
+                        <span className="text-white">✓</span>
                       )}
                     </div>
                   </button>
@@ -233,7 +233,7 @@ export default function AddExpenseModal({ telegramId, group, onClose, onExpenseA
               })}
             </div>
             {splitBetween.length > 0 && (
-              <p className="text-xs text-gray-600 mt-2">
+              <p className="text-xs text-white/60 mt-2">
                 {(parseFloat(amount) / splitBetween.length || 0).toFixed(2)} {group.currency} {t('expenses.perPerson')}
               </p>
             )}
@@ -242,11 +242,11 @@ export default function AddExpenseModal({ telegramId, group, onClose, onExpenseA
         </form>
 
         {/* Actions - fixed at bottom */}
-        <div className="flex gap-3 p-6 pt-4 border-t border-gray-100 flex-shrink-0">
+        <div className="flex gap-3 p-6 pt-4 border-t border-white/10 flex-shrink-0">
             <button
               type="button"
               onClick={onClose}
-              className="btn-secondary flex-1"
+              className="flex-1 px-6 py-3 rounded-xl bg-white/5 border border-white/10 text-white hover:bg-white/10 transition-all"
               disabled={loading}
             >
             {t('common.cancel')}
@@ -260,7 +260,7 @@ export default function AddExpenseModal({ telegramId, group, onClose, onExpenseA
                 form.requestSubmit();
               }
             }}
-            className="btn-primary flex-1" 
+            className="flex-1 px-6 py-3 rounded-xl bg-white/10 border border-white/20 text-white hover:bg-white/20 transition-all disabled:opacity-50" 
             disabled={loading}
           >
             {loading ? t('expenses.adding') : t('expenses.add')}
