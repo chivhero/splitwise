@@ -77,8 +77,8 @@ export default function PromoCodeInput({ onSuccess }: PromoCodeInputProps) {
       </button>
 
       {showModal && (
-        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-end sm:items-center justify-center z-50 p-4">
-          <div className="bg-black/30 backdrop-blur-xl border border-white/10 w-full max-w-md rounded-t-3xl sm:rounded-3xl shadow-2xl animate-slide-up">
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-end justify-center z-50">
+          <div className="bg-black/30 backdrop-blur-xl border border-white/10 border-b-0 w-full max-w-md rounded-t-3xl shadow-2xl animate-slide-up pb-safe">
             <div className="flex items-center justify-between p-6 pb-4 border-b border-white/10">
               <div className="flex items-center gap-3">
                 <div className="bg-white/10 p-2 rounded-lg border border-white/20">
