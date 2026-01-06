@@ -1,0 +1,148 @@
+{
+  "common": {
+    "loading": "Loading...",
+    "error": "Error",
+    "save": "Save",
+    "cancel": "Cancel",
+    "create": "Create",
+    "edit": "Edit",
+    "delete": "Delete",
+    "close": "Close",
+    "back": "Back",
+    "next": "Next",
+    "confirm": "Confirm",
+    "currency": "Currency",
+    "share": "Share",
+    "unknown": "Unknown",
+    "loadFailed": "Failed to load data"
+  },
+  "home": {
+    "title": "SplitWise - Split expenses easily",
+    "subtitle": "Simple app for tracking shared expenses",
+    "description": "Manage shared expenses with friends and family",
+    "getStarted": "Get Started",
+    "features": {
+      "title": "Features",
+      "trackExpenses": "Track expenses",
+      "splitBills": "Split bills",
+      "settleDebts": "Settle debts"
+    }
+  },
+  "groups": {
+    "title": "My Groups",
+    "noGroups": "You don't have any groups yet",
+    "createFirst": "Create your first group",
+    "createNew": "New Group",
+    "joinSuccess": "Successfully joined the group!"
+  },
+  "createGroup": {
+    "title": "New Group",
+    "nameLabel": "Group Name",
+    "namePlaceholder": "e.g., Trip to Sochi",
+    "nameRequired": "Name is required",
+    "descriptionLabel": "Description (optional)",
+    "descriptionPlaceholder": "Brief group description",
+    "currencyLabel": "Currency",
+    "membersLabel": "Members",
+    "addMembers": "Add members",
+    "creating": "Creating...",
+    "success": "Group created!",
+    "error": "Error creating group",
+    "connectionError": "Connection error"
+  },
+  "expenses": {
+    "title": "Expenses",
+    "add": "Add Expense",
+    "noExpenses": "No expenses yet",
+    "addFirst": "Add your first expense",
+    "description": "Description",
+    "descriptionPlaceholder": "e.g., Dinner at restaurant",
+    "descriptionRequired": "Enter expense description",
+    "amount": "Amount",
+    "amountRequired": "Enter valid amount",
+    "paidBy": "Paid by",
+    "paidByLabel": "Who paid?",
+    "paidByName": "{name} paid",
+    "splitBetween": "Split between",
+    "splitBetweenLabel": "Split between (select participants)",
+    "splitBetweenRequired": "Select at least one participant",
+    "perPerson": "Per person",
+    "category": "Category",
+    "date": "Date",
+    "adding": "Adding...",
+    "member": "Member",
+    "categories": {
+      "food": "Food",
+      "transport": "Transport",
+      "accommodation": "Accommodation",
+      "entertainment": "Entertainment",
+      "shopping": "Shopping",
+      "other": "Other"
+    },
+    "error": "Error adding expense",
+    "connectionError": "Connection error"
+  },
+  "settlements": {
+    "title": "Settlements",
+    "summary": "Summary",
+    "totalExpenses": "Total Expenses",
+    "totalSpent": "Total spent",
+    "yourBalance": "Your Balance",
+    "youOwe": "You owe",
+    "owesYou": "You should receive",
+    "optimal": "Optimal settlements",
+    "pays": "{from} pays {to}",
+    "noSettlements": "All settled up!",
+    "noExpenses": "No expenses",
+    "addExpensesToSee": "Add expenses to see settlements",
+    "necessaryTransfers": "Necessary transfers",
+    "allSettled": "All settled up! 🎉",
+    "noDebts": "Nobody owes anyone",
+    "membersBalance": "Members balance"
+  },
+  "premium": {
+    "title": "Premium",
+    "subtitle": "Get more features",
+    "upgrade": "Upgrade to Premium",
+    "bannerTitle": "Try Premium!",
+    "bannerDescription": "Unlimited groups and expenses for just $2.99/month",
+    "activateButton": "Activate Premium",
+    "limitReached": "Group limit reached",
+    "freeLimit": "Free users can create up to 5 groups",
+    "upgradeMessage": "Upgrade to Premium for unlimited groups",
+    "features": {
+      "unlimitedGroups": "Unlimited groups",
+      "unlimitedExpenses": "Unlimited expenses",
+      "advancedReports": "Advanced reports",
+      "prioritySupport": "Priority support"
+    },
+    "limits": {
+      "groups": "Groups limit: {current}/{max}",
+      "expenses": "Expenses limit: {current}/{max}"
+    }
+  },
+  "telegram": {
+    "connecting": "Connecting to Telegram...",
+    "connected": "Connected",
+    "error": "Connection error"
+  },
+  "language": {
+    "select": "Select language",
+    "ru": "Русский",
+    "en": "English"
+  },
+  "addMember": {
+    "title": "Add Member",
+    "firstName": "First Name",
+    "firstNamePlaceholder": "e.g., John",
+    "firstNameRequired": "Enter member's first name",
+    "lastName": "Last Name (optional)",
+    "lastNamePlaceholder": "e.g., Smith",
+    "adding": "Adding...",
+    "devMode": "Development mode",
+    "devModeDescription": "Add test members to check functionality",
+    "error": "Error adding member",
+    "connectionError": "Connection error"
+  }
+}
+

@@ -1,0 +1,49 @@
+{
+  "name": "splitwise-telegram",
+  "version": "1.0.0",
+  "description": "Expense Splitter с интеграцией Telegram",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "migrate": "ts-node scripts/migrate.ts",
+    "db:init": "ts-node -e \"import('./lib/db-postgres').then(db => db.initDB())\""
+  },
+  "dependencies": {
+    "@twa-dev/sdk": "^7.0.0",
+    "@vercel/postgres": "^0.10.0",
+    "better-sqlite3": "^12.4.1",
+    "date-fns": "^2.30.0",
+    "lucide-react": "^0.294.0",
+    "next": "^14.2.4",
+    "next-intl": "^4.5.3",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "uuid": "^9.0.1"
+  },
+  "devDependencies": {
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.0",
+    "@testing-library/user-event": "^14.6.1",
+    "@types/better-sqlite3": "^7.6.8",
+    "@types/jest": "^30.0.0",
+    "@types/node": "^20.10.5",
+    "@types/react": "^18.2.45",
+    "@types/react-dom": "^18.2.18",
+    "@types/uuid": "^9.0.7",
+    "autoprefixer": "^10.4.16",
+    "eslint": "^8.57.1",
+    "eslint-config-next": "^14.2.35",
+    "jest": "^30.2.0",
+    "jest-environment-jsdom": "^30.2.0",
+    "postcss": "^8.4.32",
+    "tailwindcss": "^3.3.6",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.3.3"
+  }
+}
