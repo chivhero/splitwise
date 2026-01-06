@@ -9,7 +9,9 @@ import PremiumBanner from '@/components/PremiumBanner';
 import LanguageSwitcher from '@/components/LanguageSwitcher';
 import PromoCodeInput from '@/components/PromoCodeInput';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { Plus } from 'lucide-react';
+import { isAdminTelegramId } from '@/lib/admin';
+import { Plus, Crown } from 'lucide-react';
+import Link from 'next/link';
 
 export default function Home() {
   const { t } = useLanguage();
@@ -17,12 +19,14 @@ export default function Home() {
   const [loading, setLoading] = useState(true);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [telegramId, setTelegramId] = useState<number | null>(null);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
     const tgUser = getTelegramUser();
     const userId = tgUser ? tgUser.id : 123456789; // Тестовый ID для разработки
     
     setTelegramId(userId);
+    setIsAdmin(isAdminTelegramId(userId));
     
     // Проверяем, есть ли параметр для присоединения к группе
     if (typeof window !== 'undefined') {
@@ -117,6 +121,14 @@ export default function Home() {
               <div className="h-1 w-20 bg-gradient-to-r from-white to-transparent rounded-full"></div>
             </div>
             <div className="flex items-center gap-2">
+              {isAdmin && (
+                <Link href="/admin">
+                  <button className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-yellow-500/20 to-orange-500/20 border border-yellow-500/30 text-white hover:from-yellow-500/30 hover:to-orange-500/30 transition-all text-sm">
+                    <Crown size={18} />
+                    <span className="hidden sm:inline">Admin</span>
+                  </button>
+                </Link>
+              )}
               <PromoCodeInput onSuccess={() => {
                 if (telegramId) loadGroups(telegramId);
               }} />
