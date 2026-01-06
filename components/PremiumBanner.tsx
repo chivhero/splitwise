@@ -39,39 +39,40 @@ export default function PremiumBanner() {
   };
 
   return (
-    <div className="bg-gradient-to-r from-pink-500 via-purple-500 to-indigo-600 rounded-2xl p-4 text-white relative overflow-hidden shadow-xl">
+    <div className="backdrop-blur-2xl bg-gradient-to-br from-white/15 to-white/5 rounded-2xl p-5 text-white relative overflow-hidden shadow-glass-xl border border-white/20 group">
       <button
         onClick={() => {
           setDismissed(true);
           hapticFeedback('light');
         }}
-        className="absolute top-2 right-2 text-white/80 hover:text-white"
+        className="absolute top-3 right-3 text-white/60 hover:text-white transition-all hover:bg-white/10 p-1.5 rounded-lg z-10"
       >
         <X size={20} />
       </button>
 
-      <div className="flex items-start gap-3">
-        <div className="bg-white/20 p-2 rounded-lg backdrop-blur-sm">
-          <Crown size={24} />
+      <div className="flex items-start gap-4 relative z-10">
+        <div className="backdrop-blur-xl bg-white/20 p-3 rounded-xl border border-white/30 shadow-glass group-hover:scale-110 transition-transform duration-300">
+          <Crown size={28} className="animate-float" />
         </div>
-        <div className="flex-1">
-               <h3 className="font-bold mb-1">{t('premium.bannerTitle')}</h3>
-          <p className="text-sm text-white/90 mb-3">
-                 {t('premium.bannerDescription')}
+        <div className="flex-1 pt-1">
+          <h3 className="font-bold text-lg mb-1.5">{t('premium.bannerTitle')}</h3>
+          <p className="text-sm text-white/80 mb-4 leading-relaxed">
+            {t('premium.bannerDescription')}
           </p>
           <button
             onClick={handleUpgrade}
             disabled={loading}
-                 className="bg-white text-purple-600 font-semibold px-4 py-2 rounded-lg text-sm hover:bg-white/90 transition-all shadow-md active:scale-95 disabled:opacity-50"
+            className="backdrop-blur-xl bg-white/20 hover:bg-white/30 text-white font-semibold px-5 py-2.5 rounded-xl text-sm border border-white/30 hover:border-white/50 transition-all shadow-glass active:scale-95 disabled:opacity-50"
           >
-                 {loading ? t('common.loading') : t('premium.activateButton')}
+            {loading ? t('common.loading') : t('premium.activateButton')}
           </button>
         </div>
       </div>
 
-      {/* Декоративные элементы */}
-      <div className="absolute -right-4 -bottom-4 w-24 h-24 bg-white/10 rounded-full blur-2xl"></div>
-      <div className="absolute -left-4 -top-4 w-32 h-32 bg-white/10 rounded-full blur-2xl"></div>
+      {/* Glassmorphism декор */}
+      <div className="absolute -right-8 -bottom-8 w-32 h-32 bg-white/5 rounded-full blur-3xl group-hover:bg-white/10 transition-all"></div>
+      <div className="absolute -left-8 -top-8 w-40 h-40 bg-white/5 rounded-full blur-3xl group-hover:bg-white/10 transition-all"></div>
+      <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
     </div>
   );
 }

@@ -61,14 +61,17 @@ export default function CreateGroupModal({ telegramId, onClose, onGroupCreated }
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-end justify-center z-50 animate-fade-in">
-      <div className="bg-white w-full max-w-lg rounded-t-3xl p-6 animate-slide-up">
+    <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-end justify-center z-50 animate-fade-in" onClick={onClose}>
+      <div 
+        className="backdrop-blur-2xl bg-white/10 border-t border-white/20 w-full max-w-lg rounded-t-3xl p-6 animate-slide-up shadow-glass-xl"
+        onClick={(e) => e.stopPropagation()}
+      >
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-xl font-bold">{t('createGroup.title')}</h2>
+          <h2 className="text-2xl font-bold text-white">{t('createGroup.title')}</h2>
           <button
             onClick={onClose}
-            className="text-gray-400 hover:text-gray-600 transition-colors"
+            className="text-white/60 hover:text-white transition-colors p-2 hover:bg-white/10 rounded-xl"
           >
             <X size={24} />
           </button>
@@ -77,7 +80,7 @@ export default function CreateGroupModal({ telegramId, onClose, onGroupCreated }
         {/* Form */}
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium mb-2">
+            <label className="block text-sm font-medium mb-2 text-white/90">
               {t('createGroup.nameLabel')} *
             </label>
             <input
@@ -92,7 +95,7 @@ export default function CreateGroupModal({ telegramId, onClose, onGroupCreated }
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-2">
+            <label className="block text-sm font-medium mb-2 text-white/90">
               {t('createGroup.descriptionLabel')}
             </label>
             <textarea
@@ -107,7 +110,7 @@ export default function CreateGroupModal({ telegramId, onClose, onGroupCreated }
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-2">
+            <label className="block text-sm font-medium mb-2 text-white/90">
               {t('createGroup.currencyLabel')}
             </label>
             <select
