@@ -88,46 +88,64 @@ export default function Home() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-indigo-50 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-4 border-purple-500 border-t-transparent"></div>
+      <div className="min-h-screen flex items-center justify-center relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-radial from-white/5 to-transparent animate-pulse"></div>
+        <div className="relative backdrop-blur-xl bg-white/10 p-8 rounded-3xl border border-white/20 shadow-glass-xl">
+          <div className="animate-spin rounded-full h-16 w-16 border-4 border-white/30 border-t-white"></div>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-indigo-50 pb-20">
-      {/* Header */}
-      <div className="bg-gradient-to-r from-purple-600 via-purple-500 to-indigo-600 text-white p-6 rounded-b-3xl shadow-xl">
-        <div className="flex justify-between items-start mb-2">
-          <h1 className="text-2xl font-bold">💰 {t('groups.title')}</h1>
-          <LanguageSwitcher />
+    <div className="min-h-screen pb-20 relative overflow-hidden">
+      {/* Animated Background */}
+      <div className="fixed inset-0 pointer-events-none">
+        <div className="absolute top-20 left-10 w-72 h-72 bg-white/5 rounded-full blur-3xl animate-float"></div>
+        <div className="absolute bottom-20 right-10 w-96 h-96 bg-white/3 rounded-full blur-3xl animate-float" style={{animationDelay: '1s'}}></div>
+      </div>
+
+      {/* Header with Glassmorphism */}
+      <div className="relative backdrop-blur-2xl bg-gradient-to-br from-white/10 to-white/5 border-b border-white/10 shadow-glass-lg">
+        <div className="p-6 pb-8">
+          <div className="flex justify-between items-start mb-3">
+            <div>
+              <h1 className="text-3xl font-bold text-white mb-1 tracking-tight">
+                💰 {t('groups.title')}
+              </h1>
+              <div className="h-1 w-20 bg-gradient-to-r from-white to-transparent rounded-full"></div>
+            </div>
+            <LanguageSwitcher />
+          </div>
+          <p className="text-white/70 text-sm mt-2">
+            {t('home.description')}
+          </p>
         </div>
-        <p className="text-purple-100 text-sm">
-          {t('home.description')}
-        </p>
       </div>
 
       {/* Premium Banner */}
-      <div className="px-4 mt-4">
+      <div className="px-4 mt-6 relative z-10">
         <PremiumBanner />
       </div>
 
       {/* Groups List */}
-      <div className="px-4 mt-6">
+      <div className="px-4 mt-6 relative z-10">
         {groups.length === 0 ? (
-          <div className="text-center py-12">
-            <div className="text-6xl mb-4">🎉</div>
-            <h2 className="text-xl font-semibold mb-2">{t('home.getStarted')}</h2>
-            <p className="text-gray-600 mb-6">
-              {t('groups.createFirst')}
-            </p>
-            <button
-              onClick={handleCreateGroup}
-              className="btn-primary inline-flex items-center gap-2"
-            >
-              <Plus size={20} />
-              {t('groups.createNew')}
-            </button>
+          <div className="text-center py-16">
+            <div className="backdrop-blur-2xl bg-white/5 rounded-3xl border border-white/10 p-12 shadow-glass-xl animate-fade-in">
+              <div className="text-7xl mb-6 animate-float">🎉</div>
+              <h2 className="text-2xl font-bold text-white mb-3">{t('home.getStarted')}</h2>
+              <p className="text-white/60 mb-8 max-w-md mx-auto">
+                {t('groups.createFirst')}
+              </p>
+              <button
+                onClick={handleCreateGroup}
+                className="btn-primary inline-flex items-center gap-2"
+              >
+                <Plus size={20} />
+                {t('groups.createNew')}
+              </button>
+            </div>
           </div>
         ) : (
           <>
@@ -136,13 +154,14 @@ export default function Home() {
         )}
       </div>
 
-      {/* Floating Action Button */}
+      {/* Floating Action Button with Glass Effect */}
       {groups.length > 0 && (
         <button
           onClick={handleCreateGroup}
-          className="fixed bottom-6 right-6 bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 text-white w-14 h-14 rounded-full shadow-xl hover:shadow-2xl flex items-center justify-center transition-all active:scale-95"
+          className="fixed bottom-6 right-6 backdrop-blur-xl bg-white/20 hover:bg-white/30 border border-white/30 text-white w-16 h-16 rounded-2xl shadow-glass-xl hover:shadow-glass-2xl flex items-center justify-center transition-all duration-300 active:scale-95 z-50 group"
         >
-          <Plus size={24} />
+          <Plus size={28} className="group-hover:rotate-90 transition-transform duration-300" />
+          <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
         </button>
       )}
 
