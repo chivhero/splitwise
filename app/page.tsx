@@ -7,6 +7,7 @@ import GroupList from '@/components/GroupList';
 import CreateGroupModal from '@/components/CreateGroupModal';
 import PremiumBanner from '@/components/PremiumBanner';
 import LanguageSwitcher from '@/components/LanguageSwitcher';
+import PromoCodeInput from '@/components/PromoCodeInput';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Plus } from 'lucide-react';
 
@@ -115,7 +116,12 @@ export default function Home() {
               </h1>
               <div className="h-1 w-20 bg-gradient-to-r from-white to-transparent rounded-full"></div>
             </div>
-            <LanguageSwitcher />
+            <div className="flex items-center gap-2">
+              <PromoCodeInput onSuccess={() => {
+                if (telegramId) loadGroups(telegramId);
+              }} />
+              <LanguageSwitcher />
+            </div>
           </div>
           <p className="text-white/70 text-sm mt-2">
             {t('home.description')}

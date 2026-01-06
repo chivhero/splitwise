@@ -17,6 +17,7 @@ export interface User {
   photoUrl?: string;
   isPremium: boolean;
   premiumUntil?: Date;
+  isAdmin?: boolean;
   createdAt: Date;
 }
 
@@ -64,6 +65,34 @@ export interface Balance {
   userId: string;
   balance: number; // положительное = должны вам, отрицательное = вы должны
   user?: User;
+}
+
+export interface PromoCode {
+  id: string;
+  code: string;
+  premiumDays: number;
+  maxUses: number | null;
+  usedCount: number;
+  isActive: boolean;
+  createdBy: string;
+  createdAt: Date;
+  expiresAt: Date | null;
+  creatorName?: string;
+}
+
+export interface PromoRedemption {
+  id: string;
+  promoCodeId: string;
+  userId: string;
+  redeemedAt: Date;
+}
+
+export interface AdminStats {
+  totalUsers: number;
+  totalGroups: number;
+  totalExpenses: number;
+  premiumUsers: number;
+  totalPromoCodes: number;
 }
 
 

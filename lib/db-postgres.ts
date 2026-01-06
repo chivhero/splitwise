@@ -20,6 +20,7 @@ export async function initDB() {
         photo_url TEXT,
         is_premium BOOLEAN DEFAULT FALSE,
         premium_until TIMESTAMP,
+        is_admin BOOLEAN DEFAULT FALSE,
         created_at TIMESTAMP NOT NULL DEFAULT NOW()
       )
     `;
@@ -70,10 +71,41 @@ export async function initDB() {
       )
     `;
 
+    // Promo codes table
+    await sql`
+      CREATE TABLE IF NOT EXISTS promo_codes (
+        id TEXT PRIMARY KEY,
+        code TEXT UNIQUE NOT NULL,
+        premium_days INTEGER NOT NULL,
+        max_uses INTEGER DEFAULT NULL,
+        used_count INTEGER DEFAULT 0,
+        is_active BOOLEAN DEFAULT TRUE,
+        created_by TEXT,
+        created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+        expires_at TIMESTAMP,
+        FOREIGN KEY (created_by) REFERENCES users(id)
+      )
+    `;
+
+    // Promo code redemptions table
+    await sql`
+      CREATE TABLE IF NOT EXISTS promo_redemptions (
+        id TEXT PRIMARY KEY,
+        promo_code_id TEXT NOT NULL,
+        user_id TEXT NOT NULL,
+        redeemed_at TIMESTAMP NOT NULL DEFAULT NOW(),
+        FOREIGN KEY (promo_code_id) REFERENCES promo_codes(id),
+        FOREIGN KEY (user_id) REFERENCES users(id),
+        UNIQUE(promo_code_id, user_id)
+      )
+    `;
+
     // Create indexes
     await sql`CREATE INDEX IF NOT EXISTS idx_group_members ON group_members(group_id)`;
     await sql`CREATE INDEX IF NOT EXISTS idx_expenses_group ON expenses(group_id)`;
     await sql`CREATE INDEX IF NOT EXISTS idx_users_telegram ON users(telegram_id)`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_promo_codes_code ON promo_codes(code)`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_promo_redemptions_user ON promo_redemptions(user_id)`;
 
     console.log('✅ PostgreSQL database initialized');
   } catch (error) {
@@ -384,17 +416,122 @@ export async function healthCheck(): Promise<boolean> {
 }
 
 export async function getStats() {
-  const [users, groups, expenses] = await Promise.all([
+  const [users, groups, expenses, premiumUsers, promoCodes] = await Promise.all([
     sql`SELECT COUNT(*) as count FROM users`,
     sql`SELECT COUNT(*) as count FROM groups`,
     sql`SELECT COUNT(*) as count FROM expenses`,
+    sql`SELECT COUNT(*) as count FROM users WHERE is_premium = TRUE`,
+    sql`SELECT COUNT(*) as count FROM promo_codes`,
   ]);
 
   return {
     totalUsers: parseInt(users.rows[0].count),
     totalGroups: parseInt(groups.rows[0].count),
     totalExpenses: parseInt(expenses.rows[0].count),
+    premiumUsers: parseInt(premiumUsers.rows[0].count),
+    totalPromoCodes: parseInt(promoCodes.rows[0].count),
   };
+}
+
+// ============================================
+// PROMO CODE OPERATIONS
+// ============================================
+
+export async function createPromoCode(
+  code: string,
+  premiumDays: number,
+  maxUses: number | null,
+  expiresAt: Date | null,
+  createdBy: string
+): Promise<any> {
+  const id = `promo_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+  
+  const result = await sql`
+    INSERT INTO promo_codes (id, code, premium_days, max_uses, expires_at, created_by, created_at)
+    VALUES (${id}, ${code.toUpperCase()}, ${premiumDays}, ${maxUses}, ${expiresAt ? expiresAt.toISOString() : null}, ${createdBy}, NOW())
+    RETURNING *
+  `;
+
+  return result.rows[0];
+}
+
+export async function getPromoCode(code: string): Promise<any | null> {
+  const result = await sql`
+    SELECT * FROM promo_codes 
+    WHERE code = ${code.toUpperCase()} 
+    LIMIT 1
+  `;
+
+  return result.rows.length > 0 ? result.rows[0] : null;
+}
+
+export async function getAllPromoCodes(): Promise<any[]> {
+  const result = await sql`
+    SELECT pc.*, u.first_name as creator_name
+    FROM promo_codes pc
+    LEFT JOIN users u ON pc.created_by = u.id
+    ORDER BY pc.created_at DESC
+  `;
+
+  return result.rows;
+}
+
+export async function redeemPromoCode(userId: string, promoCodeId: string): Promise<boolean> {
+  try {
+    const redemptionId = `redemption_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    
+    await sql`
+      INSERT INTO promo_redemptions (id, promo_code_id, user_id, redeemed_at)
+      VALUES (${redemptionId}, ${promoCodeId}, ${userId}, NOW())
+    `;
+
+    await sql`
+      UPDATE promo_codes 
+      SET used_count = used_count + 1 
+      WHERE id = ${promoCodeId}
+    `;
+
+    return true;
+  } catch (error) {
+    console.error('Failed to redeem promo code:', error);
+    return false;
+  }
+}
+
+export async function hasUserRedeemedPromo(userId: string, promoCodeId: string): Promise<boolean> {
+  const result = await sql`
+    SELECT 1 FROM promo_redemptions 
+    WHERE user_id = ${userId} AND promo_code_id = ${promoCodeId}
+    LIMIT 1
+  `;
+
+  return result.rows.length > 0;
+}
+
+export async function deactivatePromoCode(promoCodeId: string): Promise<void> {
+  await sql`
+    UPDATE promo_codes 
+    SET is_active = FALSE 
+    WHERE id = ${promoCodeId}
+  `;
+}
+
+export async function updateUserAdmin(userId: string, isAdmin: boolean): Promise<void> {
+  await sql`
+    UPDATE users 
+    SET is_admin = ${isAdmin}
+    WHERE id = ${userId}
+  `;
+}
+
+export async function isUserAdmin(userId: string): Promise<boolean> {
+  const result = await sql`
+    SELECT is_admin FROM users 
+    WHERE id = ${userId}
+    LIMIT 1
+  `;
+
+  return result.rows.length > 0 && result.rows[0].is_admin === true;
 }
 
 
