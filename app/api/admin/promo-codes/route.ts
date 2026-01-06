@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getUserByTelegramId, isUserAdmin, createPromoCode, getAllPromoCodes, deactivatePromoCode } from '@/lib/db-postgres';
+import { getUserByTelegramId, createPromoCode, getAllPromoCodes, deactivatePromoCode } from '@/lib/db-postgres';
+import { isAdminTelegramId } from '@/lib/admin';
 
 // GET - получить все промокоды
 export async function GET(request: NextRequest) {
@@ -15,15 +16,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Check if user is admin
-    const user = await getUserByTelegramId(parseInt(telegramId));
-    if (!user) {
-      return NextResponse.json(
-        { error: 'User not found' },
-        { status: 404 }
-      );
-    }
-
-    const isAdmin = await isUserAdmin(user.id);
+    const isAdmin = isAdminTelegramId(parseInt(telegramId));
     if (!isAdmin) {
       return NextResponse.json(
         { error: 'Access denied. Admin only.' },
@@ -57,19 +50,20 @@ export async function POST(request: NextRequest) {
     }
 
     // Check if user is admin
+    const isAdmin = isAdminTelegramId(telegramId);
+    if (!isAdmin) {
+      return NextResponse.json(
+        { error: 'Access denied. Admin only.' },
+        { status: 403 }
+      );
+    }
+
+    // Get user for created_by field
     const user = await getUserByTelegramId(telegramId);
     if (!user) {
       return NextResponse.json(
         { error: 'User not found' },
         { status: 404 }
-      );
-    }
-
-    const isAdmin = await isUserAdmin(user.id);
-    if (!isAdmin) {
-      return NextResponse.json(
-        { error: 'Access denied. Admin only.' },
-        { status: 403 }
       );
     }
 
@@ -114,15 +108,7 @@ export async function DELETE(request: NextRequest) {
     }
 
     // Check if user is admin
-    const user = await getUserByTelegramId(telegramId);
-    if (!user) {
-      return NextResponse.json(
-        { error: 'User not found' },
-        { status: 404 }
-      );
-    }
-
-    const isAdmin = await isUserAdmin(user.id);
+    const isAdmin = isAdminTelegramId(telegramId);
     if (!isAdmin) {
       return NextResponse.json(
         { error: 'Access denied. Admin only.' },

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getUserByTelegramId, getStats, isUserAdmin } from '@/lib/db-postgres';
+import { getStats } from '@/lib/db-postgres';
+import { isAdminTelegramId } from '@/lib/admin';
 
 export async function GET(request: NextRequest) {
   try {
@@ -14,15 +15,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Check if user is admin
-    const user = await getUserByTelegramId(parseInt(telegramId));
-    if (!user) {
-      return NextResponse.json(
-        { error: 'User not found' },
-        { status: 404 }
-      );
-    }
-
-    const isAdmin = await isUserAdmin(user.id);
+    const isAdmin = isAdminTelegramId(parseInt(telegramId));
     if (!isAdmin) {
       return NextResponse.json(
         { error: 'Access denied. Admin only.' },
