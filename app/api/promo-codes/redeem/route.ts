@@ -5,7 +5,7 @@ import {
   hasUserRedeemedPromo,
   redeemPromoCode,
   updateUserPremium 
-} from '@/lib/db';
+} from '@/lib/db-postgres';
 
 export async function POST(request: NextRequest) {
   try {

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getUserByTelegramId, isUserAdmin, createPromoCode, getAllPromoCodes, deactivatePromoCode } from '@/lib/db';
+import { getUserByTelegramId, isUserAdmin, createPromoCode, getAllPromoCodes, deactivatePromoCode } from '@/lib/db-postgres';
 
 // GET - получить все промокоды
 export async function GET(request: NextRequest) {

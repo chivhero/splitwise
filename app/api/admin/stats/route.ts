@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getUserByTelegramId, getStats, isUserAdmin } from '@/lib/db';
+import { getUserByTelegramId, getStats, isUserAdmin } from '@/lib/db-postgres';
 
 export async function GET(request: NextRequest) {
   try {

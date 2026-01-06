@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react';
 import { Crown, X } from 'lucide-react';
 import { openPremiumInvoice, hapticFeedback, getTelegramUser } from '@/lib/telegram';
-import { getUserByTelegramId } from '@/lib/db';
 import { useLanguage } from '@/contexts/LanguageContext';
 
 export default function PremiumBanner() {

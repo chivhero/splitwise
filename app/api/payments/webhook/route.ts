@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getUserByTelegramId, updateUserPremium } from '@/lib/db';
+import { getUserByTelegramId, updateUserPremium } from '@/lib/db-postgres';
 
 const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
 

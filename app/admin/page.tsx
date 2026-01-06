@@ -64,7 +64,7 @@ export default function AdminPage() {
         <div className="card max-w-md w-full text-center py-12">
           <div className="text-6xl mb-4">🔒</div>
           <h1 className="text-2xl font-bold text-white mb-2">Access Denied</h1>
-          <p className="text-white/60">You don't have permission to access this page.</p>
+          <p className="text-white/60">You don&apos;t have permission to access this page.</p>
         </div>
       </div>
     );
