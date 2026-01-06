@@ -156,11 +156,14 @@ export function shareGroupLink(groupId: string, groupName: string) {
 // Telegram Payments
 export function openPremiumInvoice(callback?: (status: string) => void) {
   const webApp = getTelegramWebApp();
-  if (webApp) {
+  const tgUser = getTelegramUser();
+  
+  if (webApp && tgUser) {
     // URL будет генерироваться на бэкенде
     fetch('/api/payments/create-invoice', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ telegramId: tgUser.id }),
     })
       .then(res => res.json())
       .then(data => {
@@ -171,12 +174,16 @@ export function openPremiumInvoice(callback?: (status: string) => void) {
             }
             callback?.(status);
           });
+        } else {
+          showTelegramPopup('Ошибка создания счёта. Попробуйте позже.');
         }
       })
       .catch(err => {
         console.error('Failed to create invoice:', err);
         showTelegramPopup('Ошибка создания счёта. Попробуйте позже.');
       });
+  } else {
+    showTelegramPopup('Платежи доступны только в Telegram приложении.');
   }
 }
 

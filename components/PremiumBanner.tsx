@@ -13,12 +13,20 @@ export default function PremiumBanner() {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    const tgUser = getTelegramUser();
-    if (tgUser) {
-      // В реальном приложении проверяем через API
-      // const user = getUserByTelegramId(tgUser.id);
-      // setIsPremium(user?.isPremium || false);
-    }
+    const checkPremiumStatus = async () => {
+      const tgUser = getTelegramUser();
+      if (tgUser) {
+        try {
+          const response = await fetch(`/api/users/premium-status?telegramId=${tgUser.id}`);
+          const data = await response.json();
+          setIsPremium(data.isPremium || false);
+        } catch (error) {
+          console.error('Failed to check premium status:', error);
+        }
+      }
+    };
+    
+    checkPremiumStatus();
   }, []);
 
   if (isPremium || dismissed) {
@@ -29,11 +37,26 @@ export default function PremiumBanner() {
     hapticFeedback('light');
     setLoading(true);
     
-    openPremiumInvoice((status) => {
+    openPremiumInvoice(async (status) => {
       setLoading(false);
       if (status === 'paid') {
-        setIsPremium(true);
-        hapticFeedback('success');
+        // Ждём немного, чтобы webhook успел обработаться
+        await new Promise(resolve => setTimeout(resolve, 2000));
+        
+        // Проверяем статус премиума
+        const tgUser = getTelegramUser();
+        if (tgUser) {
+          try {
+            const response = await fetch(`/api/users/premium-status?telegramId=${tgUser.id}`);
+            const data = await response.json();
+            setIsPremium(data.isPremium || false);
+            hapticFeedback('success');
+          } catch (error) {
+            console.error('Failed to check premium status:', error);
+            setIsPremium(true); // Fallback
+            hapticFeedback('success');
+          }
+        }
       }
     });
   };
