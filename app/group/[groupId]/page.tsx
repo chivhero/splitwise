@@ -84,17 +84,20 @@ export default function GroupPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-indigo-50 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-4 border-purple-500 border-t-transparent"></div>
+      <div className="min-h-screen flex items-center justify-center relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-radial from-white/5 to-transparent animate-pulse"></div>
+        <div className="relative backdrop-blur-xl bg-white/10 p-8 rounded-3xl border border-white/20 shadow-glass-xl">
+          <div className="animate-spin rounded-full h-16 w-16 border-4 border-white/30 border-t-white"></div>
+        </div>
       </div>
     );
   }
 
   if (!group) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-indigo-50 flex items-center justify-center">
-        <div className="text-center">
-          <h2 className="text-2xl font-bold mb-4">{t('common.error')}</h2>
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center backdrop-blur-2xl bg-white/10 p-10 rounded-3xl border border-white/20 shadow-glass-xl">
+          <h2 className="text-2xl font-bold text-white mb-6">{t('common.error')}</h2>
           <button onClick={() => router.push('/')} className="btn-primary">
             {t('common.back')}
           </button>
@@ -104,85 +107,93 @@ export default function GroupPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-indigo-50 pb-20">
-      {/* Header */}
-      <div className="bg-gradient-to-r from-purple-600 via-purple-500 to-indigo-600 text-white p-6 rounded-b-3xl shadow-xl">
-        <div className="flex items-center gap-3 mb-4">
-        <button
-            onClick={() => router.push('/')}
-            className="p-2 hover:bg-white/10 rounded-lg transition-colors active:scale-95"
-        >
-            <ArrowLeft size={24} />
-        </button>
-          <h1 className="text-2xl font-bold flex-1">{group.name}</h1>
-        </div>
+    <div className="min-h-screen pb-20 relative overflow-hidden">
+      {/* Animated Background */}
+      <div className="fixed inset-0 pointer-events-none">
+        <div className="absolute top-20 left-10 w-72 h-72 bg-white/5 rounded-full blur-3xl animate-float"></div>
+        <div className="absolute bottom-20 right-10 w-96 h-96 bg-white/3 rounded-full blur-3xl animate-float" style={{animationDelay: '1s'}}></div>
+      </div>
 
-        {group.description && (
-          <p className="text-purple-100 text-sm mb-4">{group.description}</p>
-        )}
+      {/* Header with Glassmorphism */}
+      <div className="relative backdrop-blur-2xl bg-gradient-to-br from-white/15 to-white/5 border-b border-white/10 shadow-glass-lg">
+        <div className="p-6">
+          <div className="flex items-center gap-3 mb-4">
+            <button
+              onClick={() => router.push('/')}
+              className="backdrop-blur-xl bg-white/10 hover:bg-white/20 p-2.5 rounded-xl transition-all border border-white/20 hover:border-white/30 active:scale-95"
+            >
+              <ArrowLeft size={24} className="text-white" />
+            </button>
+            <h1 className="text-2xl font-bold flex-1 text-white">{group.name}</h1>
+          </div>
 
-        <div className="flex gap-2 overflow-x-auto">
-          <button
-            onClick={handleAddMember}
-            className="flex items-center gap-2 px-4 py-2 bg-white/10 hover:bg-white/20 rounded-lg transition-colors whitespace-nowrap"
-          >
-            <UserPlus size={18} />
-            <span className="text-sm">{t('createGroup.addMembers')}</span>
-          </button>
-          <button
-            onClick={handleShareLink}
-            className="flex items-center gap-2 px-4 py-2 bg-white/10 hover:bg-white/20 rounded-lg transition-colors whitespace-nowrap"
-          >
-            <Users size={18} />
-            <span className="text-sm">{t('common.share')}</span>
-          </button>
+          {group.description && (
+            <p className="text-white/70 text-sm mb-4 ml-14">{group.description}</p>
+          )}
+
+          <div className="flex gap-2 overflow-x-auto ml-14">
+            <button
+              onClick={handleAddMember}
+              className="flex items-center gap-2 px-4 py-2.5 backdrop-blur-xl bg-white/10 hover:bg-white/20 rounded-xl transition-all border border-white/20 hover:border-white/30 whitespace-nowrap text-white"
+            >
+              <UserPlus size={18} />
+              <span className="text-sm font-medium">{t('createGroup.addMembers')}</span>
+            </button>
+            <button
+              onClick={handleShareLink}
+              className="flex items-center gap-2 px-4 py-2.5 backdrop-blur-xl bg-white/10 hover:bg-white/20 rounded-xl transition-all border border-white/20 hover:border-white/30 whitespace-nowrap text-white"
+            >
+              <Users size={18} />
+              <span className="text-sm font-medium">{t('common.share')}</span>
+            </button>
+          </div>
         </div>
       </div>
 
-      {/* Tabs */}
-      <div className="flex gap-2 px-4 mt-4">
-          <button
-            onClick={() => {
-              setActiveTab('expenses');
-              hapticFeedback('light');
-            }}
-          className={`flex-1 py-3 rounded-lg font-medium transition-all ${
-              activeTab === 'expenses'
-              ? 'bg-white shadow-lg text-purple-600'
-              : 'bg-white/50 text-gray-600 hover:bg-white/80'
-            }`}
-          >
+      {/* Glassmorphism Tabs */}
+      <div className="flex gap-3 px-4 mt-6 relative z-10">
+        <button
+          onClick={() => {
+            setActiveTab('expenses');
+            hapticFeedback('light');
+          }}
+          className={`flex-1 py-3.5 rounded-xl font-semibold transition-all duration-300 ${
+            activeTab === 'expenses'
+              ? 'backdrop-blur-2xl bg-white/20 border-2 border-white/30 text-white shadow-glass-lg'
+              : 'backdrop-blur-xl bg-white/5 border border-white/10 text-white/60 hover:bg-white/10 hover:text-white/80'
+          }`}
+        >
           <div className="flex items-center justify-center gap-2">
-            <TrendingUp size={18} />
+            <TrendingUp size={20} />
             {t('expenses.title')}
           </div>
-          </button>
-          <button
-            onClick={() => {
-              setActiveTab('settlements');
-              hapticFeedback('light');
-            }}
-          className={`flex-1 py-3 rounded-lg font-medium transition-all ${
-              activeTab === 'settlements'
-              ? 'bg-white shadow-lg text-purple-600'
-              : 'bg-white/50 text-gray-600 hover:bg-white/80'
-            }`}
-          >
+        </button>
+        <button
+          onClick={() => {
+            setActiveTab('settlements');
+            hapticFeedback('light');
+          }}
+          className={`flex-1 py-3.5 rounded-xl font-semibold transition-all duration-300 ${
+            activeTab === 'settlements'
+              ? 'backdrop-blur-2xl bg-white/20 border-2 border-white/30 text-white shadow-glass-lg'
+              : 'backdrop-blur-xl bg-white/5 border border-white/10 text-white/60 hover:bg-white/10 hover:text-white/80'
+          }`}
+        >
           <div className="flex items-center justify-center gap-2">
-            <Users size={18} />
+            <Users size={20} />
             {t('settlements.title')}
           </div>
-          </button>
+        </button>
       </div>
 
       {/* Content */}
-      <div className="px-4 mt-4">
+      <div className="px-4 mt-6 relative z-10">
         {activeTab === 'expenses' ? (
           expenses.length === 0 ? (
-            <div className="text-center py-12 bg-white rounded-2xl shadow-sm">
-              <div className="text-6xl mb-4">💳</div>
-              <h3 className="text-xl font-semibold mb-2">{t('expenses.noExpenses')}</h3>
-              <p className="text-gray-600 mb-6">{t('expenses.addFirst')}</p>
+            <div className="text-center py-16 backdrop-blur-2xl bg-white/5 rounded-3xl border border-white/10 shadow-glass-xl animate-fade-in">
+              <div className="text-7xl mb-6 animate-float">💳</div>
+              <h3 className="text-2xl font-bold text-white mb-3">{t('expenses.noExpenses')}</h3>
+              <p className="text-white/60 mb-8 max-w-md mx-auto">{t('expenses.addFirst')}</p>
               <button onClick={handleAddExpense} className="btn-primary inline-flex items-center gap-2">
                 <Plus size={20} />
                 {t('expenses.add')}
@@ -196,13 +207,14 @@ export default function GroupPage() {
         )}
       </div>
 
-      {/* Floating Action Button */}
+      {/* Floating Action Button with Glass Effect */}
       {activeTab === 'expenses' && expenses.length > 0 && (
         <button
           onClick={handleAddExpense}
-          className="fixed bottom-6 right-6 bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 text-white w-14 h-14 rounded-full shadow-xl hover:shadow-2xl flex items-center justify-center transition-all active:scale-95"
+          className="fixed bottom-6 right-6 backdrop-blur-xl bg-white/20 hover:bg-white/30 border border-white/30 text-white w-16 h-16 rounded-2xl shadow-glass-xl hover:shadow-glass-2xl flex items-center justify-center transition-all duration-300 active:scale-95 z-50 group"
         >
-          <Plus size={24} />
+          <Plus size={28} className="group-hover:rotate-90 transition-transform duration-300" />
+          <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
         </button>
       )}
 

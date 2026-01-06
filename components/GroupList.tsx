@@ -42,28 +42,48 @@ export default function GroupList({ groups }: GroupListProps) {
   };
 
   return (
-    <div className="space-y-3">
-      {groups.map((group) => (
+    <div className="space-y-4">
+      {groups.map((group, index) => (
         <div
           key={group.id}
           onClick={() => handleGroupClick(group.id)}
-          className="card cursor-pointer hover:shadow-md transition-shadow active:scale-98"
+          className="group card cursor-pointer hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 animate-slide-up"
+          style={{ animationDelay: `${index * 0.1}s` }}
         >
           <div className="flex items-center justify-between">
             <div className="flex-1">
-              <h3 className="font-semibold text-lg mb-1 text-purple-900">{group.name}</h3>
+              <div className="flex items-center gap-2 mb-2">
+                <div className="backdrop-blur-xl bg-white/10 p-2 rounded-lg border border-white/20 group-hover:scale-110 transition-transform">
+                  <Users size={18} className="text-white" />
+                </div>
+                <h3 className="font-bold text-xl text-white group-hover:text-white/90 transition-colors">
+                  {group.name}
+                </h3>
+              </div>
+              
               {group.description && (
-                <p className="text-purple-600 text-sm mb-2">{group.description}</p>
+                <p className="text-white/70 text-sm mb-3 ml-11 line-clamp-2">{group.description}</p>
               )}
-              <div className="flex items-center gap-2 text-sm text-indigo-500">
-                <Users size={16} />
-                <span>{getMembersText(group.members.length)}</span>
-                <span className="text-purple-300">•</span>
-                <span>{group.currency}</span>
+              
+              <div className="flex items-center gap-3 text-sm text-white/60 ml-11">
+                <span className="backdrop-blur-xl bg-white/5 px-3 py-1 rounded-full border border-white/10">
+                  {getMembersText(group.members.length)}
+                </span>
+                <span className="text-white/30">•</span>
+                <span className="backdrop-blur-xl bg-white/5 px-3 py-1 rounded-full border border-white/10 font-medium">
+                  {group.currency}
+                </span>
               </div>
             </div>
-            <ChevronRight size={20} className="text-purple-400" />
+            
+            <ChevronRight 
+              size={24} 
+              className="text-white/40 group-hover:text-white/80 group-hover:translate-x-1 transition-all" 
+            />
           </div>
+          
+          {/* Glassmorphism hover effect */}
+          <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/5 to-white/0 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none rounded-2xl"></div>
         </div>
       ))}
     </div>
