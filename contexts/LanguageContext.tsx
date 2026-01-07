@@ -54,13 +54,24 @@ function detectUserLanguage(): Locale {
     if (typeof window !== 'undefined') {
       const saved = localStorage.getItem('language');
       if (saved === 'en' || saved === 'ru') {
+        console.log('[Language] Loaded from localStorage:', saved);
         return saved;
       }
     }
     
-    // 2. Проверяем язык браузера
+    // 2. Проверяем Telegram Web App язык
+    if (typeof window !== 'undefined' && (window as any).Telegram?.WebApp) {
+      const tgLang = (window as any).Telegram.WebApp.initDataUnsafe?.user?.language_code;
+      console.log('[Language] Telegram language:', tgLang);
+      if (tgLang === 'ru' || tgLang === 'uk' || tgLang === 'be') {
+        return 'ru';
+      }
+    }
+    
+    // 3. Проверяем язык браузера
     if (typeof window !== 'undefined' && typeof navigator !== 'undefined' && navigator.language) {
       const browserLang = navigator.language.toLowerCase();
+      console.log('[Language] Browser language:', browserLang);
       if (browserLang.startsWith('ru') || 
           browserLang.startsWith('be') || 
           browserLang.startsWith('uk')) {
@@ -71,7 +82,8 @@ function detectUserLanguage(): Locale {
     console.warn('Error detecting language:', error);
   }
   
-  // 3. По умолчанию русский
+  // 4. По умолчанию русский
+  console.log('[Language] Using default: ru');
   return 'ru';
 }
 
@@ -79,7 +91,20 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
   // Инициализируем язык сразу, синхронно
   const [locale, setLocaleState] = useState<Locale>(() => {
     if (typeof window === 'undefined') return 'ru';
-    return detectUserLanguage();
+    const detected = detectUserLanguage();
+    
+    // Принудительно устанавливаем русский, если язык не был сохранён ранее
+    if (typeof window !== 'undefined' && !localStorage.getItem('language')) {
+      try {
+        localStorage.setItem('language', 'ru');
+        console.log('[Language] First launch, set default: ru');
+      } catch (e) {
+        console.warn('Failed to save default language');
+      }
+      return 'ru';
+    }
+    
+    return detected;
   });
 
   const setLocale = (newLocale: Locale) => {
