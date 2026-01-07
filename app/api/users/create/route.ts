@@ -6,20 +6,17 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { telegramId, firstName, lastName, username } = body;
 
+    console.log('[API /users/create] Request:', { telegramId, firstName, lastName, username });
+
     if (!telegramId || !firstName) {
+      console.error('[API /users/create] Missing required fields');
       return NextResponse.json(
         { error: 'telegramId and firstName are required' },
         { status: 400 }
       );
     }
 
-    // Проверяем, не существует ли уже такой пользователь
-    const existingUser = await getUserByTelegramId(Number(telegramId));
-    if (existingUser) {
-      return NextResponse.json({ user: existingUser });
-    }
-
-    // Создаём нового пользователя
+    // createUser теперь сам обрабатывает проверку и создание/обновление
     const user = await createUser(
       Number(telegramId),
       firstName,
@@ -27,9 +24,10 @@ export async function POST(request: NextRequest) {
       username || `user_${telegramId}`
     );
 
+    console.log('[API /users/create] User created/updated:', user.id);
     return NextResponse.json({ user });
   } catch (error) {
-    console.error('Create user error:', error);
+    console.error('[API /users/create] Error:', error);
     return NextResponse.json(
       { error: 'Failed to create user' },
       { status: 500 }

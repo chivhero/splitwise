@@ -125,21 +125,54 @@ export async function createUser(
   username?: string,
   photoUrl?: string
 ): Promise<User> {
+  console.log(`[createUser] Attempting to create/get user with telegramId: ${telegramId}`);
+  
+  // Сначала проверяем, существует ли пользователь
+  const existingUser = await getUserByTelegramId(telegramId);
+  
+  if (existingUser) {
+    console.log(`[createUser] User already exists, returning existing user: ${existingUser.id}`);
+    
+    // Обновляем данные существующего пользователя
+    const updateResult = await sql`
+      UPDATE users 
+      SET 
+        first_name = ${firstName},
+        last_name = ${lastName || null},
+        username = ${username || null},
+        photo_url = ${photoUrl || null}
+      WHERE telegram_id = ${telegramId}
+      RETURNING *
+    `;
+    
+    const row = updateResult.rows[0];
+    
+    return {
+      id: row.id,
+      telegramId: row.telegram_id,
+      firstName: row.first_name,
+      lastName: row.last_name,
+      username: row.username,
+      photoUrl: row.photo_url,
+      isPremium: row.is_premium,
+      premiumUntil: row.premium_until ? new Date(row.premium_until) : undefined,
+      createdAt: new Date(row.created_at),
+    };
+  }
+  
+  // Создаём нового пользователя
   const id = `user_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+  console.log(`[createUser] Creating new user with id: ${id}`);
   
   const result = await sql`
     INSERT INTO users (id, telegram_id, first_name, last_name, username, photo_url, created_at)
     VALUES (${id}, ${telegramId}, ${firstName}, ${lastName || null}, ${username || null}, ${photoUrl || null}, NOW())
-    ON CONFLICT (telegram_id) 
-    DO UPDATE SET 
-      first_name = ${firstName},
-      last_name = ${lastName || null},
-      username = ${username || null},
-      photo_url = ${photoUrl || null}
     RETURNING *
   `;
 
   const row = result.rows[0];
+  
+  console.log(`[createUser] User created successfully: ${row.id}`);
   
   return {
     id: row.id,
