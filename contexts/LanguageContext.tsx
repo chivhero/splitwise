@@ -83,10 +83,12 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
   });
 
   const setLocale = (newLocale: Locale) => {
+    console.log('[Language] Switching to:', newLocale);
     setLocaleState(newLocale);
     if (typeof window !== 'undefined') {
       try {
         localStorage.setItem('language', newLocale);
+        console.log('[Language] Saved to localStorage:', newLocale);
       } catch (error) {
         console.warn('Failed to save language to localStorage:', error);
       }
@@ -95,7 +97,8 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
 
   const t = (key: string, params?: Record<string, any>): string => {
     const template = getNestedValue(messages[locale], key);
-    return interpolate(template, params);
+    const result = interpolate(template, params);
+    return result;
   };
 
   return (
