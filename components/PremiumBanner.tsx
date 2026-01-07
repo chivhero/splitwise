@@ -6,7 +6,7 @@ import { openPremiumInvoice, hapticFeedback, getTelegramUser } from '@/lib/teleg
 import { useLanguage } from '@/contexts/LanguageContext';
 
 export default function PremiumBanner() {
-  const { t } = useLanguage();
+  const { t, locale } = useLanguage();
   const [isPremium, setIsPremium] = useState(false);
   const [dismissed, setDismissed] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -61,7 +61,7 @@ export default function PremiumBanner() {
   };
 
   return (
-    <div className="backdrop-blur-2xl bg-gradient-to-br from-white/15 to-white/5 rounded-2xl p-5 text-white relative overflow-hidden shadow-glass-xl border border-white/20 group">
+    <div key={locale} className="backdrop-blur-2xl bg-gradient-to-br from-white/15 to-white/5 rounded-2xl p-5 text-white relative overflow-hidden shadow-glass-xl border border-white/20 group">
       <button
         onClick={() => {
           setDismissed(true);

@@ -14,7 +14,7 @@ import { Plus, Crown } from 'lucide-react';
 import Link from 'next/link';
 
 export default function Home() {
-  const { t } = useLanguage();
+  const { t, locale } = useLanguage();
   const [groups, setGroups] = useState<Group[]>([]);
   const [loading, setLoading] = useState(true);
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -103,7 +103,7 @@ export default function Home() {
   }
 
   return (
-    <div className="min-h-screen pb-20 relative overflow-hidden">
+    <div key={locale} className="min-h-screen pb-20 relative overflow-hidden">
       {/* Animated Background */}
       <div className="fixed inset-0 pointer-events-none">
         <div className="absolute top-20 left-10 w-72 h-72 bg-white/5 rounded-full blur-3xl animate-float"></div>

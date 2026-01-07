@@ -13,7 +13,7 @@ interface CreateGroupModalProps {
 }
 
 export default function CreateGroupModal({ telegramId, onClose, onGroupCreated }: CreateGroupModalProps) {
-  const { t } = useLanguage();
+  const { t, locale } = useLanguage();
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [currency, setCurrency] = useState('USD');
@@ -63,6 +63,7 @@ export default function CreateGroupModal({ telegramId, onClose, onGroupCreated }
   return (
     <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-end justify-center z-50 animate-fade-in" onClick={onClose}>
       <div 
+        key={locale}
         className="backdrop-blur-2xl bg-white/10 border-t border-white/20 w-full max-w-lg rounded-t-3xl p-6 animate-slide-up shadow-glass-xl"
         onClick={(e) => e.stopPropagation()}
       >
