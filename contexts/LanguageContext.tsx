@@ -50,40 +50,54 @@ function interpolate(template: string, params?: Record<string, any>): string {
 // Определение языка пользователя
 function detectUserLanguage(): Locale {
   try {
-    // 1. Проверяем localStorage
+    // 1. Проверяем localStorage (приоритет пользователя)
     if (typeof window !== 'undefined') {
       const saved = localStorage.getItem('language');
       if (saved === 'en' || saved === 'ru') {
-        console.log('[Language] Loaded from localStorage:', saved);
+        console.log('[Language] 🎯 Loaded from localStorage:', saved);
         return saved;
       }
     }
     
-    // 2. Проверяем Telegram Web App язык
+    // 2. Проверяем Telegram Web App язык (автоматическое определение)
     if (typeof window !== 'undefined' && (window as any).Telegram?.WebApp) {
-      const tgLang = (window as any).Telegram.WebApp.initDataUnsafe?.user?.language_code;
-      console.log('[Language] Telegram language:', tgLang);
-      if (tgLang === 'ru' || tgLang === 'uk' || tgLang === 'be') {
-        return 'ru';
+      const tgUser = (window as any).Telegram.WebApp.initDataUnsafe?.user;
+      const tgLang = tgUser?.language_code;
+      
+      console.log('[Language] 📱 Telegram user:', tgUser);
+      console.log('[Language] 🌍 Telegram language:', tgLang);
+      
+      if (tgLang) {
+        // Русскоязычные страны
+        const russianLangs = ['ru', 'uk', 'be', 'kk', 'ky', 'uz', 'tg'];
+        if (russianLangs.includes(tgLang.toLowerCase())) {
+          console.log('[Language] ✅ Detected Russian-speaking user');
+          return 'ru';
+        }
+        
+        // Все остальные - английский
+        console.log('[Language] ✅ Detected English-speaking user');
+        return 'en';
       }
     }
     
     // 3. Проверяем язык браузера
     if (typeof window !== 'undefined' && typeof navigator !== 'undefined' && navigator.language) {
       const browserLang = navigator.language.toLowerCase();
-      console.log('[Language] Browser language:', browserLang);
-      if (browserLang.startsWith('ru') || 
-          browserLang.startsWith('be') || 
-          browserLang.startsWith('uk')) {
+      console.log('[Language] 💻 Browser language:', browserLang);
+      
+      const russianRegions = ['ru', 'be', 'uk', 'kz', 'kg', 'uz', 'tj'];
+      if (russianRegions.some(lang => browserLang.startsWith(lang))) {
+        console.log('[Language] ✅ Browser suggests Russian');
         return 'ru';
       }
     }
   } catch (error) {
-    console.warn('Error detecting language:', error);
+    console.warn('[Language] ⚠️ Error detecting language:', error);
   }
   
-  // 4. По умолчанию русский
-  console.log('[Language] Using default: ru');
+  // 4. По умолчанию русский (СНГ регион)
+  console.log('[Language] 🔧 Using default: ru');
   return 'ru';
 }
 

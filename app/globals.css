@@ -31,6 +31,12 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+/* Явное предотвращение зачеркивания текста */
+h1, h2, h3, h4, h5, h6, p, span, div, button, a {
+  text-decoration: none !important;
+  -webkit-text-decoration: none !important;
+}
+
 /* Animated gradient background */
 body::before {
   content: '';
