@@ -133,6 +133,7 @@
   },
   "addMember": {
     "title": "Добавить участника",
+    "info": "Добавьте людей в группу по имени",
     "firstName": "Имя",
     "firstNamePlaceholder": "Например: Иван",
     "firstNameRequired": "Введите имя участника",

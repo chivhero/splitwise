@@ -133,6 +133,7 @@
   },
   "addMember": {
     "title": "Add Member",
+    "info": "Add people to your group by name",
     "firstName": "First Name",
     "firstNamePlaceholder": "e.g., John",
     "firstNameRequired": "Enter member's first name",

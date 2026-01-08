@@ -87,7 +87,7 @@ export default function AddMemberModal({ groupId, onClose, onMemberAdded }: AddM
         {/* Info Banner */}
         <div className="bg-white/5 border border-white/10 rounded-xl p-3 mb-4">
           <p className="text-sm text-white/80">
-            💡 {t('addMember.info', 'Add people to your group by name')}
+            💡 {t('addMember.info')}
           </p>
         </div>
 
