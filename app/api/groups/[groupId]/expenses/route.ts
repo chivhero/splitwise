@@ -82,9 +82,9 @@ export async function POST(
     // Определяем кто платил
     let paidByUser;
     if (paidByUserId) {
-      paidByUser = group.members.find(m => m.userId === paidByUserId)?.user;
+      paidByUser = group.members.find((m: any) => m.userId === paidByUserId)?.user;
     } else if (paidByTelegramId) {
-      paidByUser = group.members.find(m => m.user?.telegramId === Number(paidByTelegramId))?.user;
+      paidByUser = group.members.find((m: any) => m.user?.telegramId === Number(paidByTelegramId))?.user;
     }
 
     if (!paidByUser) {
@@ -102,7 +102,7 @@ export async function POST(
     } else if (splitBetweenTelegramIds && splitBetweenTelegramIds.length > 0) {
       // Конвертируем telegram IDs в user IDs
       for (const tgId of splitBetweenTelegramIds) {
-        const member = group.members.find(m => m.user?.telegramId === Number(tgId));
+        const member = group.members.find((m: any) => m.user?.telegramId === Number(tgId));
         if (member && member.user) {
           finalSplitBetweenUserIds.push(member.user.id);
         }
