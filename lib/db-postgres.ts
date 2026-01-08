@@ -13,7 +13,7 @@ export async function initDB() {
     await sql`
       CREATE TABLE IF NOT EXISTS users (
         id TEXT PRIMARY KEY,
-        telegram_id INTEGER UNIQUE NOT NULL,
+        telegram_id INTEGER UNIQUE,
         first_name TEXT NOT NULL,
         last_name TEXT,
         username TEXT,
