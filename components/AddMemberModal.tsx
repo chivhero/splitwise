@@ -29,17 +29,13 @@ export default function AddMemberModal({ groupId, onClose, onMemberAdded }: AddM
     hapticFeedback('light');
 
     try {
-      // Генерируем случайный Telegram ID для тестирования
-      const fakeTelegramId = Math.floor(Math.random() * 900000000) + 100000000;
-
-      // Создаём пользователя
-      const createUserResponse = await fetch('/api/users/create', {
+      // Создаём пользователя только по имени (без Telegram ID)
+      const createUserResponse = await fetch('/api/users/create-by-name', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          telegramId: fakeTelegramId,
           firstName: firstName.trim(),
-          lastName: lastName.trim(),
+          lastName: lastName.trim() || undefined,
         }),
       });
 
@@ -47,11 +43,14 @@ export default function AddMemberModal({ groupId, onClose, onMemberAdded }: AddM
         throw new Error('Failed to create user');
       }
 
-      // Добавляем пользователя в группу
+      const { user } = await createUserResponse.json();
+      console.log('User created:', user);
+
+      // Добавляем пользователя в группу по userId
       const joinResponse = await fetch(`/api/groups/${groupId}/join`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ telegramId: fakeTelegramId }),
+        body: JSON.stringify({ userId: user.id }),
       });
 
       if (joinResponse.ok) {
@@ -88,7 +87,7 @@ export default function AddMemberModal({ groupId, onClose, onMemberAdded }: AddM
         {/* Info Banner */}
         <div className="bg-white/5 border border-white/10 rounded-xl p-3 mb-4">
           <p className="text-sm text-white/80">
-            💡 <strong>{t('addMember.devMode')}:</strong> {t('addMember.devModeDescription')}
+            💡 {t('addMember.info', 'Add people to your group by name')}
           </p>
         </div>
 

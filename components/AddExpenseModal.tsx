@@ -17,8 +17,13 @@ export default function AddExpenseModal({ telegramId, group, onClose, onExpenseA
   const { t } = useLanguage();
   const [description, setDescription] = useState('');
   const [amount, setAmount] = useState('');
-  const [paidBy, setPaidBy] = useState<number>(telegramId);
-  const [splitBetween, setSplitBetween] = useState<number[]>([telegramId]);
+  
+  // Находим текущего пользователя
+  const currentUserMember = group.members.find(m => m.user?.telegramId === telegramId);
+  const currentUserId = currentUserMember?.userId;
+  
+  const [paidBy, setPaidBy] = useState<string>(currentUserId || '');
+  const [splitBetween, setSplitBetween] = useState<string[]>(currentUserId ? [currentUserId] : []);
   const [category, setCategory] = useState('other');
   const [loading, setLoading] = useState(false);
 
@@ -31,13 +36,13 @@ export default function AddExpenseModal({ telegramId, group, onClose, onExpenseA
     { id: 'other', emoji: '💰' },
   ];
 
-  const toggleMember = (memberTgId: number) => {
-    if (splitBetween.includes(memberTgId)) {
+  const toggleMember = (userId: string) => {
+    if (splitBetween.includes(userId)) {
       if (splitBetween.length > 1) {
-        setSplitBetween(splitBetween.filter(id => id !== memberTgId));
+        setSplitBetween(splitBetween.filter(id => id !== userId));
       }
     } else {
-      setSplitBetween([...splitBetween, memberTgId]);
+      setSplitBetween([...splitBetween, userId]);
     }
     hapticFeedback('light');
   };
@@ -71,8 +76,8 @@ export default function AddExpenseModal({ telegramId, group, onClose, onExpenseA
         body: JSON.stringify({
           description: description.trim(),
           amount: amountNum,
-          paidByTelegramId: paidBy,
-          splitBetweenTelegramIds: splitBetween,
+          paidByUserId: paidBy,
+          splitBetweenUserIds: splitBetween,
           telegramId,
           category,
         }),
@@ -97,11 +102,9 @@ export default function AddExpenseModal({ telegramId, group, onClose, onExpenseA
   };
 
   const getMemberName = (member: any) => {
-    return member.user?.firstName || t('expenses.member');
-  };
-
-  const getMemberTgId = (member: any) => {
-    return member.user?.telegramId;
+    const firstName = member.user?.firstName || t('expenses.member');
+    const lastName = member.user?.lastName || '';
+    return lastName ? `${firstName} ${lastName}` : firstName;
   };
 
   return (
@@ -173,16 +176,15 @@ export default function AddExpenseModal({ telegramId, group, onClose, onExpenseA
             <label className="block text-sm font-medium mb-2 text-white/80">{t('expenses.paidByLabel')} *</label>
             <div className="space-y-2">
               {group.members.map((member) => {
-                const tgId = getMemberTgId(member);
                 const memberName = getMemberName(member);
-                const isSelected = paidBy === tgId;
+                const isSelected = paidBy === member.userId;
                 
                 return (
                   <button
                     key={member.userId}
                     type="button"
                     onClick={() => {
-                      setPaidBy(tgId);
+                      setPaidBy(member.userId);
                       hapticFeedback('light');
                     }}
                     className={`w-full p-3 rounded-xl border-2 text-left transition-all ${
@@ -208,13 +210,12 @@ export default function AddExpenseModal({ telegramId, group, onClose, onExpenseA
             </label>
             <div className="space-y-2">
               {group.members.map((member) => {
-                const tgId = getMemberTgId(member);
-                const isSelected = splitBetween.includes(tgId);
+                const isSelected = splitBetween.includes(member.userId);
                 return (
                   <button
                     key={member.userId}
                     type="button"
-                    onClick={() => toggleMember(tgId)}
+                    onClick={() => toggleMember(member.userId)}
                     className={`w-full p-3 rounded-xl border-2 text-left transition-all ${
                       isSelected
                         ? 'border-white/40 bg-white/10'

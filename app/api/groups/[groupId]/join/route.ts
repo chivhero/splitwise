@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { addGroupMember, getUserByTelegramId, getGroupById, createUser } from '@/lib/db-adapter';
+import { addGroupMember, getUserByTelegramId, getUserById, getGroupById, createUser } from '@/lib/db-adapter';
 
 export async function POST(
   request: NextRequest,
@@ -7,14 +7,14 @@ export async function POST(
 ) {
   try {
     const body = await request.json();
-    const { telegramId } = body;
+    const { telegramId, userId } = body;
 
-    console.log('[API /groups/join] Request:', { groupId: params.groupId, telegramId });
+    console.log('[API /groups/join] Request:', { groupId: params.groupId, telegramId, userId });
 
-    if (!telegramId) {
-      console.error('[API /groups/join] Missing telegramId');
+    if (!telegramId && !userId) {
+      console.error('[API /groups/join] Missing telegramId or userId');
       return NextResponse.json(
-        { error: 'telegramId is required' },
+        { error: 'telegramId or userId is required' },
         { status: 400 }
       );
     }
@@ -31,13 +31,27 @@ export async function POST(
       );
     }
 
-    // Получаем или создаём пользователя
-    console.log('[API /groups/join] Getting user by telegramId:', telegramId);
-    let user = await getUserByTelegramId(Number(telegramId));
+    // Получаем пользователя
+    let user;
+    if (userId) {
+      console.log('[API /groups/join] Getting user by userId:', userId);
+      user = await getUserById(userId);
+    } else if (telegramId) {
+      console.log('[API /groups/join] Getting user by telegramId:', telegramId);
+      user = await getUserByTelegramId(Number(telegramId));
+      
+      if (!user) {
+        console.log('[API /groups/join] User not found, creating new user');
+        user = await createUser(Number(telegramId), 'New User', '', 'user_' + telegramId);
+      }
+    }
     
     if (!user) {
-      console.log('[API /groups/join] User not found, creating new user');
-      user = await createUser(Number(telegramId), 'New User', '', 'user_' + telegramId);
+      console.error('[API /groups/join] User not found');
+      return NextResponse.json(
+        { error: 'User not found' },
+        { status: 404 }
+      );
     }
     
     console.log('[API /groups/join] User retrieved/created:', user.id);

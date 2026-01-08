@@ -10,7 +10,7 @@ export interface TelegramUser {
 
 export interface User {
   id: string;
-  telegramId: number;
+  telegramId?: number; // Optional - users can be added by name only
   firstName: string;
   lastName?: string;
   username?: string;

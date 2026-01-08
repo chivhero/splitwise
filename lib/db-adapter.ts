@@ -26,6 +26,7 @@ if (useSQLite) {
 export const {
   initDB,
   createUser,
+  createUserByName,
   getUserByTelegramId,
   getUserById,
   updateUserPremium,
@@ -42,6 +43,13 @@ export const {
 // Export дополнительных функций если они есть
 export const healthCheck = db.healthCheck;
 export const getStats = db.getStats;
+export const getPromoCode = db.getPromoCode;
+export const getAllPromoCodes = db.getAllPromoCodes;
+export const createPromoCode = db.createPromoCode;
+export const deactivatePromoCode = db.deactivatePromoCode;
+export const redeemPromoCode = db.redeemPromoCode;
+export const hasUserRedeemedPromo = db.hasUserRedeemedPromo;
+export const isUserAdmin = db.isUserAdmin;
 
 export default db.default || db;
 

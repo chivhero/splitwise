@@ -156,6 +156,7 @@ export async function createUser(
       photoUrl: row.photo_url,
       isPremium: row.is_premium,
       premiumUntil: row.premium_until ? new Date(row.premium_until) : undefined,
+      isAdmin: row.is_admin,
       createdAt: new Date(row.created_at),
     };
   }
@@ -183,6 +184,39 @@ export async function createUser(
     photoUrl: row.photo_url,
     isPremium: row.is_premium,
     premiumUntil: row.premium_until ? new Date(row.premium_until) : undefined,
+    isAdmin: row.is_admin,
+    createdAt: new Date(row.created_at),
+  };
+}
+
+// Создать пользователя только по имени (без Telegram ID)
+export async function createUserByName(
+  firstName: string,
+  lastName?: string
+): Promise<User> {
+  const id = `user_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+  console.log(`[createUserByName] Creating user by name: ${firstName} ${lastName || ''}, id: ${id}`);
+  
+  const result = await sql`
+    INSERT INTO users (id, telegram_id, first_name, last_name, created_at)
+    VALUES (${id}, NULL, ${firstName}, ${lastName || null}, NOW())
+    RETURNING *
+  `;
+
+  const row = result.rows[0];
+  
+  console.log(`[createUserByName] User created: ${row.id}`);
+  
+  return {
+    id: row.id,
+    telegramId: row.telegram_id,
+    firstName: row.first_name,
+    lastName: row.last_name,
+    username: row.username,
+    photoUrl: row.photo_url,
+    isPremium: row.is_premium,
+    premiumUntil: row.premium_until ? new Date(row.premium_until) : undefined,
+    isAdmin: row.is_admin,
     createdAt: new Date(row.created_at),
   };
 }
@@ -205,6 +239,7 @@ export async function getUserByTelegramId(telegramId: number): Promise<User | nu
     photoUrl: row.photo_url,
     isPremium: row.is_premium,
     premiumUntil: row.premium_until ? new Date(row.premium_until) : undefined,
+    isAdmin: row.is_admin,
     createdAt: new Date(row.created_at),
   };
 }
@@ -227,6 +262,7 @@ export async function getUserById(id: string): Promise<User | null> {
     photoUrl: row.photo_url,
     isPremium: row.is_premium,
     premiumUntil: row.premium_until ? new Date(row.premium_until) : undefined,
+    isAdmin: row.is_admin,
     createdAt: new Date(row.created_at),
   };
 }

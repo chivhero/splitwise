@@ -23,9 +23,29 @@ export async function POST(
 ) {
   try {
     const body = await request.json();
-    const { description, amount, paidByTelegramId, splitBetweenTelegramIds, telegramId, category, date } = body;
+    const { 
+      description, 
+      amount, 
+      paidByUserId,
+      paidByTelegramId, 
+      splitBetweenUserIds,
+      splitBetweenTelegramIds, 
+      telegramId, 
+      category, 
+      date 
+    } = body;
 
-    if (!description || !amount || !paidByTelegramId || !splitBetweenTelegramIds || !telegramId) {
+    console.log('[API /expenses] Request:', { 
+      description, 
+      amount, 
+      paidByUserId,
+      paidByTelegramId,
+      splitBetweenUserIds,
+      splitBetweenTelegramIds, 
+      telegramId 
+    });
+
+    if (!description || !amount || !telegramId) {
       return NextResponse.json(
         { error: 'Missing required fields' },
         { status: 400 }
@@ -59,38 +79,65 @@ export async function POST(
       }
     }
 
-    const paidByUser = await getUserByTelegramId(Number(paidByTelegramId));
+    // Определяем кто платил
+    let paidByUser;
+    if (paidByUserId) {
+      paidByUser = group.members.find(m => m.userId === paidByUserId)?.user;
+    } else if (paidByTelegramId) {
+      paidByUser = group.members.find(m => m.user?.telegramId === Number(paidByTelegramId))?.user;
+    }
+
     if (!paidByUser) {
+      console.error('[API /expenses] Paid by user not found');
       return NextResponse.json(
         { error: 'Paid by user not found' },
         { status: 404 }
       );
     }
 
-    // Конвертируем telegram IDs в user IDs
-    const splitBetweenUserIds: string[] = [];
-    for (const tgId of splitBetweenTelegramIds) {
-      const member = await getUserByTelegramId(Number(tgId));
-      if (member) {
-        splitBetweenUserIds.push(member.id);
+    // Определяем между кем делить
+    let finalSplitBetweenUserIds: string[] = [];
+    if (splitBetweenUserIds && splitBetweenUserIds.length > 0) {
+      finalSplitBetweenUserIds = splitBetweenUserIds;
+    } else if (splitBetweenTelegramIds && splitBetweenTelegramIds.length > 0) {
+      // Конвертируем telegram IDs в user IDs
+      for (const tgId of splitBetweenTelegramIds) {
+        const member = group.members.find(m => m.user?.telegramId === Number(tgId));
+        if (member && member.user) {
+          finalSplitBetweenUserIds.push(member.user.id);
+        }
       }
     }
+
+    if (finalSplitBetweenUserIds.length === 0) {
+      console.error('[API /expenses] No valid split between users');
+      return NextResponse.json(
+        { error: 'No valid split between users' },
+        { status: 400 }
+      );
+    }
+
+    console.log('[API /expenses] Creating expense:', {
+      paidBy: paidByUser.id,
+      splitBetween: finalSplitBetweenUserIds
+    });
 
     const expense = await createExpense(
       params.groupId,
       description,
       Number(amount),
       paidByUser.id,
-      splitBetweenUserIds,
+      finalSplitBetweenUserIds,
       user.id,
       group.currency,
       category,
       date ? new Date(date) : undefined
     );
 
+    console.log('[API /expenses] Expense created:', expense.id);
     return NextResponse.json({ expense });
   } catch (error) {
-    console.error('Create expense error:', error);
+    console.error('[API /expenses] Error:', error);
     return NextResponse.json(
       { error: 'Failed to create expense' },
       { status: 500 }
