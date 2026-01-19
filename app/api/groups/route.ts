@@ -14,10 +14,13 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    let user = await getUserByTelegramId(Number(telegramId));
+    const user = await getUserByTelegramId(Number(telegramId));
     if (!user) {
-      // Автоматически создаём пользователя для разработки
-      user = await createUser(Number(telegramId), 'Test User', 'Developer', 'testuser');
+      console.error('[GET /api/groups] User not found:', telegramId);
+      return NextResponse.json(
+        { error: 'User not authenticated. Please restart the app.' },
+        { status: 401 }
+      );
     }
 
     const groups = await getUserGroups(user.id);
@@ -44,10 +47,13 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    let user = await getUserByTelegramId(Number(telegramId));
+    const user = await getUserByTelegramId(Number(telegramId));
     if (!user) {
-      // Автоматически создаём пользователя для разработки
-      user = await createUser(Number(telegramId), 'Test User', 'Developer', 'testuser');
+      console.error('[POST /api/groups] User not authenticated:', telegramId);
+      return NextResponse.json(
+        { error: 'User not authenticated. Please restart the app.' },
+        { status: 401 }
+      );
     }
 
     // Проверка лимита групп для бесплатных пользователей

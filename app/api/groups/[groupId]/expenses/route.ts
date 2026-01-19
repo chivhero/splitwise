@@ -79,16 +79,26 @@ export async function POST(
       }
     }
 
+    // Логируем доступных участников для отладки
+    console.log('[API /expenses] Group members:', group.members.map((m: any) => ({
+      userId: m.userId,
+      userDbId: m.user?.id,
+      firstName: m.user?.firstName,
+      telegramId: m.user?.telegramId
+    })));
+
     // Определяем кто платил
     let paidByUser;
     if (paidByUserId) {
+      console.log('[API /expenses] Looking for paidByUserId:', paidByUserId);
       paidByUser = group.members.find((m: any) => m.userId === paidByUserId)?.user;
+      console.log('[API /expenses] Found paidByUser:', paidByUser ? { id: paidByUser.id, firstName: paidByUser.firstName } : null);
     } else if (paidByTelegramId) {
       paidByUser = group.members.find((m: any) => m.user?.telegramId === Number(paidByTelegramId))?.user;
     }
 
     if (!paidByUser) {
-      console.error('[API /expenses] Paid by user not found');
+      console.error('[API /expenses] Paid by user not found. paidByUserId:', paidByUserId, 'available members:', group.members.map((m: any) => m.userId));
       return NextResponse.json(
         { error: 'Paid by user not found' },
         { status: 404 }

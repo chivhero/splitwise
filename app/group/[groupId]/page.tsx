@@ -38,14 +38,17 @@ export default function GroupPage() {
 
   const loadGroupData = async () => {
     try {
+      // Добавляем cache: 'no-store' чтобы гарантировать свежие данные
       const [groupRes, expensesRes] = await Promise.all([
-        fetch(`/api/groups/${groupId}`),
-        fetch(`/api/groups/${groupId}/expenses`),
+        fetch(`/api/groups/${groupId}`, { cache: 'no-store' }),
+        fetch(`/api/groups/${groupId}/expenses`, { cache: 'no-store' }),
       ]);
 
       const groupData = await groupRes.json();
       const expensesData = await expensesRes.json();
 
+      console.log('[GroupPage] Loaded group with members:', groupData.group?.members?.length);
+      
       setGroup(groupData.group);
       setExpenses(expensesData.expenses || []);
     } catch (error) {

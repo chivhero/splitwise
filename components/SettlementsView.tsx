@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { Group, Settlement, Balance } from '@/types';
 import { ArrowRight, CheckCircle } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { getTelegramUser } from '@/lib/telegram';
 
 interface SettlementsViewProps {
   groupId: string;
@@ -38,7 +39,16 @@ export default function SettlementsView({ groupId, group }: SettlementsViewProps
     }
   };
 
+  // Получаем текущего пользователя
+  const tgUser = getTelegramUser();
+  const currentUserMember = tgUser ? group.members.find(m => m.user?.telegramId === tgUser.id) : null;
+  const currentUserId = currentUserMember?.userId;
+  
   const getUserName = (userId: string) => {
+    // Если это текущий пользователь - показываем "Вы"/"You"
+    if (userId === currentUserId) {
+      return t('common.you');
+    }
     const member = group.members.find(m => m.userId === userId);
     return member?.user?.firstName || t('common.unknown');
   };

@@ -14,7 +14,8 @@
     "currency": "Валюта",
     "share": "Поделиться",
     "unknown": "Неизвестный",
-    "loadFailed": "Не удалось загрузить данные"
+    "loadFailed": "Не удалось загрузить данные",
+    "you": "Вы"
   },
   "home": {
     "title": "SplitWise - Делим расходы легко",
@@ -62,6 +63,7 @@
     "amountRequired": "Введите корректную сумму",
     "paidBy": "Оплатил",
     "paidByLabel": "Кто заплатил?",
+    "paidByRequired": "Выберите плательщика",
     "paidByName": "{name} заплатил",
     "splitBetween": "Разделить между",
     "splitBetweenLabel": "Разделить между (выберите участников)",

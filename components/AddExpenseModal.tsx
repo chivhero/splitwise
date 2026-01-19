@@ -26,6 +26,7 @@ export default function AddExpenseModal({ telegramId, group, onClose, onExpenseA
   const [splitBetween, setSplitBetween] = useState<string[]>(currentUserId ? [currentUserId] : []);
   const [category, setCategory] = useState('other');
   const [loading, setLoading] = useState(false);
+  const [paidByError, setPaidByError] = useState(false);
 
   const categories = [
     { id: 'food', emoji: '🍔' },
@@ -61,11 +62,19 @@ export default function AddExpenseModal({ telegramId, group, onClose, onExpenseA
       return;
     }
 
+    // Валидация плательщика
+    if (!paidBy) {
+      setPaidByError(true);
+      hapticFeedback('error');
+      return;
+    }
+
     if (splitBetween.length === 0) {
       showTelegramPopup(t('expenses.splitBetweenRequired'));
       return;
     }
 
+    setPaidByError(false);
     setLoading(true);
     hapticFeedback('light');
 
@@ -102,6 +111,10 @@ export default function AddExpenseModal({ telegramId, group, onClose, onExpenseA
   };
 
   const getMemberName = (member: any) => {
+    // Если это текущий пользователь - показываем "Вы"/"You"
+    if (member.userId === currentUserId) {
+      return t('common.you');
+    }
     const firstName = member.user?.firstName || t('expenses.member');
     const lastName = member.user?.lastName || '';
     return lastName ? `${firstName} ${lastName}` : firstName;
@@ -174,7 +187,7 @@ export default function AddExpenseModal({ telegramId, group, onClose, onExpenseA
 
           <div>
             <label className="block text-sm font-medium mb-2 text-white/80">{t('expenses.paidByLabel')} *</label>
-            <div className="space-y-2">
+            <div className={`space-y-2 max-h-48 overflow-y-auto rounded-xl ${paidByError ? 'ring-2 ring-red-500' : ''}`}>
               {group.members.map((member) => {
                 const memberName = getMemberName(member);
                 const isSelected = paidBy === member.userId;
@@ -185,6 +198,7 @@ export default function AddExpenseModal({ telegramId, group, onClose, onExpenseA
                     type="button"
                     onClick={() => {
                       setPaidBy(member.userId);
+                      setPaidByError(false);
                       hapticFeedback('light');
                     }}
                     className={`w-full p-3 rounded-xl border-2 text-left transition-all ${
@@ -202,13 +216,16 @@ export default function AddExpenseModal({ telegramId, group, onClose, onExpenseA
                 );
               })}
             </div>
+            {paidByError && (
+              <p className="text-xs text-red-400 mt-2">{t('expenses.paidByRequired')}</p>
+            )}
           </div>
 
           <div>
             <label className="block text-sm font-medium mb-2 text-white/80">
               {t('expenses.splitBetweenLabel')} *
             </label>
-            <div className="space-y-2">
+            <div className="space-y-2 max-h-48 overflow-y-auto rounded-xl">
               {group.members.map((member) => {
                 const isSelected = splitBetween.includes(member.userId);
                 return (

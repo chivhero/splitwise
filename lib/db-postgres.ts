@@ -10,10 +10,11 @@ import { User, Group, GroupMember, Expense } from '@/types';
 export async function initDB() {
   try {
     // Users table
+    // Note: telegram_id is BIGINT (supports IDs > 2.1B) and nullable (for name-only users)
     await sql`
       CREATE TABLE IF NOT EXISTS users (
         id TEXT PRIMARY KEY,
-        telegram_id INTEGER UNIQUE,
+        telegram_id BIGINT UNIQUE,
         first_name TEXT NOT NULL,
         last_name TEXT,
         username TEXT,
@@ -370,11 +371,27 @@ export async function getGroupById(groupId: string): Promise<Group | null> {
 }
 
 export async function getGroupMembers(groupId: string): Promise<GroupMember[]> {
+  // Явно указываем колонки чтобы избежать конфликтов имён
   const result = await sql`
-    SELECT gm.*, u.* FROM group_members gm
+    SELECT 
+      gm.user_id,
+      gm.group_id,
+      gm.role,
+      gm.joined_at,
+      u.id as user_db_id,
+      u.telegram_id,
+      u.first_name,
+      u.last_name,
+      u.username,
+      u.photo_url,
+      u.is_premium,
+      u.created_at as user_created_at
+    FROM group_members gm
     INNER JOIN users u ON gm.user_id = u.id
     WHERE gm.group_id = ${groupId}
   `;
+
+  console.log(`[getGroupMembers] Found ${result.rows.length} members for group ${groupId}`);
 
   return result.rows.map(row => ({
     userId: row.user_id,
@@ -382,14 +399,14 @@ export async function getGroupMembers(groupId: string): Promise<GroupMember[]> {
     role: row.role,
     joinedAt: new Date(row.joined_at),
     user: {
-      id: row.id,
+      id: row.user_db_id,
       telegramId: row.telegram_id,
       firstName: row.first_name,
       lastName: row.last_name,
       username: row.username,
       photoUrl: row.photo_url,
       isPremium: row.is_premium,
-      createdAt: new Date(row.created_at),
+      createdAt: new Date(row.user_created_at),
     },
   }));
 }

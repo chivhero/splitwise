@@ -4,6 +4,7 @@ import { Expense, Group } from '@/types';
 import { format } from 'date-fns';
 import { ru, enUS } from 'date-fns/locale';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { getTelegramUser } from '@/lib/telegram';
 
 interface ExpenseListProps {
   expenses: Expense[];
@@ -13,7 +14,16 @@ interface ExpenseListProps {
 export default function ExpenseList({ expenses, group }: ExpenseListProps) {
   const { t, locale } = useLanguage();
   
+  // Получаем текущего пользователя
+  const tgUser = getTelegramUser();
+  const currentUserMember = tgUser ? group.members.find(m => m.user?.telegramId === tgUser.id) : null;
+  const currentUserId = currentUserMember?.userId;
+  
   const getUserName = (userId: string) => {
+    // Если это текущий пользователь - показываем "Вы"/"You"
+    if (userId === currentUserId) {
+      return t('common.you');
+    }
     const member = group.members.find(m => m.userId === userId);
     return member?.user?.firstName || t('common.unknown');
   };

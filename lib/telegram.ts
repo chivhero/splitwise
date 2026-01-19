@@ -74,6 +74,16 @@ export function getTelegramUser(): TelegramUser | null {
   return webApp?.initDataUnsafe?.user || null;
 }
 
+/**
+ * Get raw initData string from Telegram WebApp
+ * This string should be sent to backend for HMAC-SHA256 validation
+ * @returns initData string or empty string if not available
+ */
+export function getTelegramInitData(): string {
+  const webApp = getTelegramWebApp();
+  return webApp?.initData || '';
+}
+
 export function isTelegramWebApp(): boolean {
   return typeof window !== 'undefined' && !!window.Telegram?.WebApp;
 }

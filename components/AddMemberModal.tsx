@@ -47,13 +47,18 @@ export default function AddMemberModal({ groupId, onClose, onMemberAdded }: AddM
       console.log('User created:', user);
 
       // Добавляем пользователя в группу по userId
+      console.log('[AddMemberModal] Adding user to group:', { userId: user.id, groupId });
       const joinResponse = await fetch(`/api/groups/${groupId}/join`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ userId: user.id }),
       });
 
+      const joinData = await joinResponse.json();
+      console.log('[AddMemberModal] Join response:', joinData);
+
       if (joinResponse.ok) {
+        console.log('[AddMemberModal] Successfully added member, calling onMemberAdded');
         onMemberAdded();
         hapticFeedback('success');
       } else {

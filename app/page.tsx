@@ -23,8 +23,14 @@ export default function Home() {
 
   useEffect(() => {
     const tgUser = getTelegramUser();
-    const userId = tgUser ? tgUser.id : 123456789; // Тестовый ID для разработки
     
+    if (!tgUser) {
+      console.warn('[Home] No Telegram user found - waiting for authentication...');
+      setLoading(false);
+      return;
+    }
+    
+    const userId = tgUser.id;
     setTelegramId(userId);
     setIsAdmin(isAdminTelegramId(userId));
     
@@ -97,6 +103,28 @@ export default function Home() {
         <div className="absolute inset-0 bg-gradient-radial from-white/5 to-transparent animate-pulse"></div>
         <div className="relative backdrop-blur-xl bg-white/10 p-8 rounded-3xl border border-white/20 shadow-glass-xl">
           <div className="animate-spin rounded-full h-16 w-16 border-4 border-white/30 border-t-white"></div>
+        </div>
+      </div>
+    );
+  }
+
+  // Если пользователь не авторизован (не запущено в Telegram)
+  if (!telegramId) {
+    return (
+      <div className="min-h-screen flex items-center justify-center relative overflow-hidden p-6">
+        <div className="absolute inset-0 bg-gradient-radial from-white/5 to-transparent"></div>
+        <div className="relative backdrop-blur-xl bg-white/10 p-8 rounded-3xl border border-white/20 shadow-glass-xl max-w-md text-center">
+          <div className="text-6xl mb-4">🤖</div>
+          <h2 className="text-2xl font-bold text-white mb-3">{t('errors.telegramOnly')}</h2>
+          <p className="text-white/70 mb-6">
+            Пожалуйста, откройте это приложение через официального бота @SplitWisedbot в Telegram
+          </p>
+          <a 
+            href="https://t.me/SplitWisedbot"
+            className="btn-primary inline-block"
+          >
+            Открыть бота
+          </a>
         </div>
       </div>
     );

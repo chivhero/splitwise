@@ -1,7 +1,12 @@
+// Telegram WebApp Provider Component
+// Author: @V_day0 (https://x.com/V_day0)
+// Updated by Cursor agent per RULES
+// Security: HIGH - sends validated initData to backend for HMAC-SHA256 verification
+
 'use client';
 
 import { useEffect } from 'react';
-import { initTelegramWebApp, getTelegramUser, isTelegramWebApp } from '@/lib/telegram';
+import { initTelegramWebApp, getTelegramInitData, isTelegramWebApp } from '@/lib/telegram';
 
 export default function TelegramProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
@@ -20,24 +25,51 @@ export default function TelegramProvider({ children }: { children: React.ReactNo
             console.error('[TelegramProvider] Failed to init Telegram WebApp:', error);
           }
           
-          const tgUser = getTelegramUser();
-          console.log('[TelegramProvider] Telegram user:', tgUser);
+          // Get initData string for backend validation (SECURITY: HMAC-SHA256)
+          const initData = getTelegramInitData();
+          console.log('[TelegramProvider] initData length:', initData.length);
           
-          if (tgUser) {
-            // Аутентифицируем пользователя через API
-            fetch('/api/auth/telegram', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ telegramUser: tgUser }),
-            })
-              .then(res => res.json())
-              .then(data => {
-                console.log('[TelegramProvider] Auth success:', data);
-              })
-              .catch(err => {
-                console.error('[TelegramProvider] Auth error:', err);
-              });
+          if (!initData || initData.length === 0) {
+            console.warn('[TelegramProvider] initData is empty - app not opened in Telegram');
+            if (window.Telegram?.WebApp) {
+              window.Telegram.WebApp.showAlert(
+                'Пожалуйста, откройте это приложение через официального бота @SplitWisedbot'
+              );
+            }
+            return;
           }
+          
+          console.log('[TelegramProvider] Authenticating with initData (secure)...');
+          
+          // Аутентифицируем пользователя через API с валидацией HMAC-SHA256
+          fetch('/api/auth/telegram', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ initData }),
+          })
+            .then(async res => {
+              if (!res.ok) {
+                const errorData = await res.json();
+                throw new Error(errorData.error || 'Authentication failed');
+              }
+              return res.json();
+            })
+            .then(data => {
+              console.log('[TelegramProvider] Auth success:', data);
+              // Сохраняем данные пользователя в localStorage для использования
+              if (data.user) {
+                localStorage.setItem('telegram_user', JSON.stringify(data.user));
+              }
+            })
+            .catch(err => {
+              console.error('[TelegramProvider] Auth error:', err);
+              // Show error to user if in Telegram
+              if (window.Telegram?.WebApp) {
+                window.Telegram.WebApp.showAlert(
+                  'Ошибка авторизации. Попробуйте перезапустить приложение.'
+                );
+              }
+            });
         } else {
           console.log('[TelegramProvider] Running outside Telegram WebApp');
         }

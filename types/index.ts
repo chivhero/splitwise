@@ -1,7 +1,7 @@
 // Типы для приложения
 
 export interface TelegramUser {
-  id: number;
+  id: number; // Telegram user ID (can be > 2.1B, stored as BIGINT in DB)
   first_name: string;
   last_name?: string;
   username?: string;
@@ -10,7 +10,7 @@ export interface TelegramUser {
 
 export interface User {
   id: string;
-  telegramId?: number; // Optional - users can be added by name only
+  telegramId?: number; // Telegram ID (BIGINT in DB, optional - users can be added by name only)
   firstName: string;
   lastName?: string;
   username?: string;

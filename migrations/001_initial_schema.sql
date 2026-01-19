@@ -4,7 +4,7 @@
 -- Users table
 CREATE TABLE IF NOT EXISTS users (
   id TEXT PRIMARY KEY,
-  telegram_id INTEGER UNIQUE NOT NULL,
+  telegram_id BIGINT UNIQUE,
   first_name TEXT NOT NULL,
   last_name TEXT,
   username TEXT,

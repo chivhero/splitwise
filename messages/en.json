@@ -14,7 +14,8 @@
     "currency": "Currency",
     "share": "Share",
     "unknown": "Unknown",
-    "loadFailed": "Failed to load data"
+    "loadFailed": "Failed to load data",
+    "you": "You"
   },
   "home": {
     "title": "SplitWise - Split expenses easily",
@@ -62,6 +63,7 @@
     "amountRequired": "Enter valid amount",
     "paidBy": "Paid by",
     "paidByLabel": "Who paid?",
+    "paidByRequired": "Please select who paid",
     "paidByName": "{name} paid",
     "splitBetween": "Split between",
     "splitBetweenLabel": "Split between (select participants)",

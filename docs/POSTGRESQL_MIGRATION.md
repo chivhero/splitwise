@@ -235,7 +235,10 @@ npm run dev
 # Создайте тестового пользователя через API
 curl http://localhost:3000/api/auth/telegram -X POST \
   -H "Content-Type: application/json" \
-  -d '{"telegramId": 123, "firstName": "Test"}'
+  -d '{"initData": "query_id=...&user=...&auth_date=...&hash=..."}'
+```
+
+**Note**: В production initData предоставляется автоматически Telegram WebApp SDK.
 ```
 
 ### 3. Проверьте логи
