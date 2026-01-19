@@ -12,7 +12,12 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { telegramId, code } = body;
 
-    if (!telegramId || !code) {
+    // Очищаем код от пробелов и приводим к верхнему регистру
+    const cleanCode = code?.toString().trim().toUpperCase().replace(/\s/g, '');
+
+    console.log('[Promo Redeem] Request:', { telegramId, originalCode: code, cleanCode });
+
+    if (!telegramId || !cleanCode) {
       return NextResponse.json(
         { error: 'Telegram ID and promo code are required' },
         { status: 400 }
@@ -22,15 +27,21 @@ export async function POST(request: NextRequest) {
     // Get user
     const user = await getUserByTelegramId(telegramId);
     if (!user) {
+      console.log('[Promo Redeem] User not found:', telegramId);
       return NextResponse.json(
         { error: 'User not found' },
         { status: 404 }
       );
     }
 
+    console.log('[Promo Redeem] User found:', user.id);
+
     // Get promo code
-    const promoCode = await getPromoCode(code);
+    const promoCode = await getPromoCode(cleanCode);
+    console.log('[Promo Redeem] Promo code lookup result:', promoCode ? { id: promoCode.id, code: promoCode.code, is_active: promoCode.is_active } : null);
+    
     if (!promoCode) {
+      console.log('[Promo Redeem] Promo code not found:', cleanCode);
       return NextResponse.json(
         { error: 'Промокод не найден' },
         { status: 404 }

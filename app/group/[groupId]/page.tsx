@@ -75,9 +75,16 @@ export default function GroupPage() {
     setShowAddMember(true);
   };
 
-  const handleMemberAdded = () => {
+  const handleMemberAdded = (updatedGroup?: Group) => {
     setShowAddMember(false);
-    loadGroupData();
+    if (updatedGroup) {
+      // Используем данные группы напрямую из ответа API (без проблем с read replica)
+      console.log('[GroupPage] Using group from API response with', updatedGroup.members?.length, 'members');
+      setGroup(updatedGroup);
+    } else {
+      // Fallback: перезагружаем данные
+      loadGroupData();
+    }
     hapticFeedback('success');
   };
 

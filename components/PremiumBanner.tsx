@@ -61,7 +61,7 @@ export default function PremiumBanner() {
   };
 
   return (
-    <div key={locale} className="backdrop-blur-2xl bg-gradient-to-br from-white/15 to-white/5 rounded-2xl p-5 text-white relative overflow-hidden shadow-glass-xl border border-white/20 group">
+    <div key={locale} className="backdrop-blur-2xl bg-gradient-to-br from-white/15 to-white/5 rounded-2xl p-5 text-white relative overflow-hidden shadow-glass-xl border border-white/20 group z-10">
       <button
         onClick={() => {
           setDismissed(true);

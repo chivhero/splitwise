@@ -371,6 +371,12 @@ export async function getGroupById(groupId: string): Promise<Group | null> {
 }
 
 export async function getGroupMembers(groupId: string): Promise<GroupMember[]> {
+  // Сначала проверим сколько записей в group_members напрямую
+  const countResult = await sql`
+    SELECT COUNT(*) as cnt FROM group_members WHERE group_id = ${groupId}
+  `;
+  const rawCount = countResult.rows[0]?.cnt || 0;
+  
   // Явно указываем колонки чтобы избежать конфликтов имён
   const result = await sql`
     SELECT 
@@ -389,9 +395,10 @@ export async function getGroupMembers(groupId: string): Promise<GroupMember[]> {
     FROM group_members gm
     INNER JOIN users u ON gm.user_id = u.id
     WHERE gm.group_id = ${groupId}
+    ORDER BY gm.joined_at ASC
   `;
 
-  console.log(`[getGroupMembers] Found ${result.rows.length} members for group ${groupId}`);
+  console.log(`[getGroupMembers] Raw count: ${rawCount}, JOIN result: ${result.rows.length} for group ${groupId}`);
 
   return result.rows.map(row => ({
     userId: row.user_id,
@@ -542,11 +549,18 @@ export async function createPromoCode(
 }
 
 export async function getPromoCode(code: string): Promise<any | null> {
+  // Очищаем код от пробелов и приводим к верхнему регистру
+  const cleanCode = code.trim().toUpperCase().replace(/\s/g, '');
+  
+  console.log('[getPromoCode] Looking for code:', cleanCode);
+  
   const result = await sql`
     SELECT * FROM promo_codes 
-    WHERE code = ${code.toUpperCase()} 
+    WHERE UPPER(TRIM(code)) = ${cleanCode}
     LIMIT 1
   `;
+
+  console.log('[getPromoCode] Found:', result.rows.length > 0 ? result.rows[0].code : 'none');
 
   return result.rows.length > 0 ? result.rows[0] : null;
 }

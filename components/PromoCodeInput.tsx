@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { Ticket, X } from 'lucide-react';
 import { hapticFeedback, showTelegramPopup, getTelegramUser } from '@/lib/telegram';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -14,6 +15,12 @@ export default function PromoCodeInput({ onSuccess }: PromoCodeInputProps) {
   const [showModal, setShowModal] = useState(false);
   const [code, setCode] = useState('');
   const [loading, setLoading] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  // Для Portal - ждём монтирования на клиенте
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const handleRedeem = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -76,70 +83,110 @@ export default function PromoCodeInput({ onSuccess }: PromoCodeInputProps) {
         <span>Промокод</span>
       </button>
 
-      {showModal && (
-        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-end justify-center z-50">
-          <div className="bg-black/30 backdrop-blur-xl border border-white/10 border-b-0 w-full max-w-md rounded-t-3xl shadow-2xl animate-slide-up pb-safe">
-            <div className="flex items-center justify-between p-6 pb-4 border-b border-white/10">
-              <div className="flex items-center gap-3">
-                <div className="bg-white/10 p-2 rounded-lg border border-white/20">
-                  <Ticket className="text-white" size={20} />
+      {showModal && mounted && createPortal(
+        <div 
+          className="fixed inset-0 flex items-center justify-center p-4"
+          style={{ 
+            position: 'fixed', 
+            top: 0, 
+            left: 0, 
+            right: 0, 
+            bottom: 0,
+            zIndex: 99999 
+          }}
+        >
+          {/* Overlay - кликабельный для закрытия */}
+          <div 
+            className="absolute inset-0 bg-black/95"
+            onClick={() => setShowModal(false)}
+          />
+          
+          {/* Модальное окно - по центру */}
+          <div className="relative w-full max-w-sm bg-gradient-to-b from-[#1f1f1f] to-[#141414] border border-white/10 rounded-3xl shadow-2xl overflow-hidden">
+            {/* Декоративные элементы */}
+            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-32 bg-amber-500/20 rounded-full blur-3xl" />
+            <div className="absolute -top-4 -right-4 w-24 h-24 bg-purple-500/10 rounded-full blur-2xl" />
+            
+            {/* Кнопка закрытия */}
+            <button
+              onClick={() => setShowModal(false)}
+              className="absolute top-4 right-4 text-white/40 hover:text-white transition-colors z-20 p-1"
+            >
+              <X size={22} />
+            </button>
+
+            {/* Контент */}
+            <div className="relative z-10 p-6 pt-8">
+              {/* Иконка */}
+              <div className="flex justify-center mb-4">
+                <div className="bg-gradient-to-br from-amber-400/20 to-orange-500/20 p-4 rounded-2xl border border-amber-500/30">
+                  <Ticket className="text-amber-400" size={32} />
                 </div>
+              </div>
+
+              {/* Заголовок */}
+              <div className="text-center mb-6">
+                <h2 className="text-xl font-bold text-white mb-1">🎟️ Промокод</h2>
+                <p className="text-sm text-white/50">Введите код для активации Premium</p>
+              </div>
+
+              {/* Форма */}
+              <form onSubmit={handleRedeem} className="space-y-4">
                 <div>
-                  <h2 className="text-lg font-bold text-white">Активировать промокод</h2>
-                  <p className="text-xs text-white/60">Получите Premium бесплатно</p>
+                  <input
+                    type="text"
+                    value={code}
+                    onChange={(e) => setCode(e.target.value.toUpperCase().replace(/\s/g, ''))}
+                    placeholder="ВВЕДИТЕ КОД"
+                    className="w-full px-4 py-4 rounded-2xl bg-black/40 border-2 border-white/10 text-white text-center text-xl font-bold placeholder:text-white/30 focus:outline-none focus:border-amber-500/50 focus:bg-black/60 transition-all uppercase tracking-[0.2em]"
+                    maxLength={20}
+                    autoFocus
+                    disabled={loading}
+                    autoComplete="off"
+                    autoCorrect="off"
+                    autoCapitalize="characters"
+                    spellCheck={false}
+                  />
                 </div>
-              </div>
-              <button
-                onClick={() => setShowModal(false)}
-                className="text-white/60 hover:text-white transition-colors"
-              >
-                <X size={24} />
-              </button>
+
+                {/* Инфо */}
+                <div className="bg-white/5 rounded-xl p-3 border border-white/5">
+                  <p className="text-xs text-white/40 text-center">
+                    ✨ Промокоды дают бесплатный доступ к Premium
+                  </p>
+                </div>
+
+                {/* Кнопки */}
+                <div className="flex gap-3 pt-2">
+                  <button
+                    type="button"
+                    onClick={() => setShowModal(false)}
+                    className="flex-1 px-4 py-3.5 rounded-xl bg-white/5 text-white/70 hover:bg-white/10 hover:text-white transition-all font-medium"
+                    disabled={loading}
+                  >
+                    Отмена
+                  </button>
+                  <button
+                    type="submit"
+                    className="flex-1 px-4 py-3.5 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 text-white font-semibold hover:from-amber-400 hover:to-orange-400 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-amber-500/20"
+                    disabled={loading || !code.trim()}
+                  >
+                    {loading ? (
+                      <span className="flex items-center justify-center gap-2">
+                        <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                        </svg>
+                        Проверка...
+                      </span>
+                    ) : 'Активировать'}
+                  </button>
+                </div>
+              </form>
             </div>
-
-            <form onSubmit={handleRedeem} className="p-6 space-y-4">
-              <div>
-                <label className="block text-sm font-medium mb-2 text-white/80">
-                  Промокод
-                </label>
-                <input
-                  type="text"
-                  value={code}
-                  onChange={(e) => setCode(e.target.value.toUpperCase())}
-                  placeholder="ВВЕДИТЕ_ПРОМОКОД"
-                  className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white text-center text-lg font-bold placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-white/20 transition-all uppercase"
-                  maxLength={20}
-                  autoFocus
-                  disabled={loading}
-                />
-              </div>
-
-              <div className="bg-white/5 border border-white/10 rounded-xl p-3">
-                <p className="text-xs text-white/60 text-center">
-                  ✨ Промокоды дают доступ к Premium функциям бесплатно
-                </p>
-              </div>
-
-              <div className="flex gap-3">
-                <button
-                  type="button"
-                  onClick={() => setShowModal(false)}
-                  className="flex-1 px-6 py-3 rounded-xl bg-white/5 border border-white/10 text-white hover:bg-white/10 transition-all"
-                  disabled={loading}
-                >
-                  Отмена
-                </button>
-                <button
-                  type="submit"
-                  className="flex-1 px-6 py-3 rounded-xl bg-white/10 border border-white/20 text-white hover:bg-white/20 transition-all disabled:opacity-50"
-                  disabled={loading}
-                >
-                  {loading ? 'Активация...' : 'Активировать'}
-                </button>
-              </div>
-            </form>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </>
   );

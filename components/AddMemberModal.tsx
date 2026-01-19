@@ -5,10 +5,12 @@ import { X } from 'lucide-react';
 import { hapticFeedback, showTelegramPopup } from '@/lib/telegram';
 import { useLanguage } from '@/contexts/LanguageContext';
 
+import { Group } from '@/types';
+
 interface AddMemberModalProps {
   groupId: string;
   onClose: () => void;
-  onMemberAdded: () => void;
+  onMemberAdded: (updatedGroup?: Group) => void;
 }
 
 export default function AddMemberModal({ groupId, onClose, onMemberAdded }: AddMemberModalProps) {
@@ -58,12 +60,14 @@ export default function AddMemberModal({ groupId, onClose, onMemberAdded }: AddM
       console.log('[AddMemberModal] Join response:', joinData);
 
       if (joinResponse.ok) {
-        console.log('[AddMemberModal] Successfully added member, calling onMemberAdded');
-        onMemberAdded();
+        console.log('[AddMemberModal] Successfully added member');
+        // Передаём обновлённую группу из ответа API (с primary, без проблем с replica)
+        const updatedGroup = joinData.group;
+        console.log('[AddMemberModal] Updated group has', updatedGroup?.members?.length, 'members');
+        onMemberAdded(updatedGroup);
         hapticFeedback('success');
       } else {
-        const data = await joinResponse.json();
-        showTelegramPopup(data.error || t('addMember.error'));
+        showTelegramPopup(joinData.error || t('addMember.error'));
         hapticFeedback('error');
       }
     } catch (error) {
