@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { addGroupMember, getUserByTelegramId, getUserById, getGroupById, createUser } from '@/lib/db-adapter';
+import { addGroupMember, getUserByTelegramId, getUserById, createUser, checkGroupMembership } from '@/lib/db-adapter';
 
 export async function POST(
   request: NextRequest,
@@ -20,16 +20,6 @@ export async function POST(
     }
 
     const groupId = params.groupId;
-
-    // Проверяем существование группы
-    const group = await getGroupById(groupId);
-    if (!group) {
-      console.error('[API /groups/join] Group not found:', groupId);
-      return NextResponse.json(
-        { error: 'Group not found' },
-        { status: 404 }
-      );
-    }
 
     // Получаем пользователя
     let user;
@@ -56,12 +46,12 @@ export async function POST(
     
     console.log('[API /groups/join] User retrieved/created:', user.id);
 
-    // Проверяем, не является ли пользователь уже участником
-    const isAlreadyMember = group.members.some((m: any) => m.userId === user.id);
+    // Проверяем, не является ли пользователь уже участником (простой запрос)
+    const isAlreadyMember = await checkGroupMembership(groupId, user.id);
     if (isAlreadyMember) {
       console.log('[API /groups/join] User is already a member');
       return NextResponse.json(
-        { message: 'Already a member', group },
+        { message: 'Already a member', member: null },
         { status: 200 }
       );
     }
@@ -70,8 +60,7 @@ export async function POST(
     console.log('[API /groups/join] Adding user to group:', { userId: user.id, groupId });
     await addGroupMember(groupId, user.id);
 
-    // Вместо повторного чтения из БД (может попасть на read replica),
-    // вручную конструируем обновлённую группу с новым участником
+    // Возвращаем нового участника (клиент сам добавит его в свой список)
     const newMember = {
       userId: user.id,
       groupId: groupId,
@@ -79,16 +68,11 @@ export async function POST(
       joinedAt: new Date(),
       user: user,
     };
-    
-    const updatedGroup = {
-      ...group,
-      members: [...group.members, newMember],
-    };
 
-    console.log('[API /groups/join] Successfully added user to group. Total members:', updatedGroup.members.length);
+    console.log('[API /groups/join] Successfully added user to group:', newMember.user.firstName);
     return NextResponse.json({ 
       message: 'Successfully joined group',
-      group: updatedGroup 
+      member: newMember 
     });
   } catch (error) {
     console.error('[API /groups/join] Error:', error);

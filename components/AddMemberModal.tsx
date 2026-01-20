@@ -5,12 +5,12 @@ import { X } from 'lucide-react';
 import { hapticFeedback, showTelegramPopup } from '@/lib/telegram';
 import { useLanguage } from '@/contexts/LanguageContext';
 
-import { Group } from '@/types';
+import { GroupMember } from '@/types';
 
 interface AddMemberModalProps {
   groupId: string;
   onClose: () => void;
-  onMemberAdded: (updatedGroup?: Group) => void;
+  onMemberAdded: (newMember: GroupMember) => void;
 }
 
 export default function AddMemberModal({ groupId, onClose, onMemberAdded }: AddMemberModalProps) {
@@ -60,12 +60,17 @@ export default function AddMemberModal({ groupId, onClose, onMemberAdded }: AddM
       console.log('[AddMemberModal] Join response:', joinData);
 
       if (joinResponse.ok) {
-        console.log('[AddMemberModal] Successfully added member');
-        // Передаём обновлённую группу из ответа API (с primary, без проблем с replica)
-        const updatedGroup = joinData.group;
-        console.log('[AddMemberModal] Updated group has', updatedGroup?.members?.length, 'members');
-        onMemberAdded(updatedGroup);
-        hapticFeedback('success');
+        const newMember = joinData.member;
+        if (newMember) {
+          console.log('[AddMemberModal] Successfully added member:', newMember.user?.firstName);
+          onMemberAdded(newMember);
+          hapticFeedback('success');
+        } else {
+          // Участник уже был в группе
+          console.log('[AddMemberModal] User was already a member');
+          showTelegramPopup(t('addMember.alreadyMember') || 'Этот участник уже в группе');
+          hapticFeedback('light');
+        }
       } else {
         showTelegramPopup(joinData.error || t('addMember.error'));
         hapticFeedback('error');

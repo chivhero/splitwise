@@ -32,6 +32,7 @@ export const {
   updateUserPremium,
   createGroup,
   addGroupMember,
+  checkGroupMembership,
   getUserGroups,
   getGroupById,
   getGroupMembers,

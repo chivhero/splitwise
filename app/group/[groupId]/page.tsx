@@ -36,20 +36,58 @@ export default function GroupPage() {
     loadGroupData();
   }, [groupId]);
 
-  const loadGroupData = async () => {
+  // Ключ для хранения участников в localStorage (сохраняется между сессиями)
+  const membersStorageKey = `group_members_${groupId}`;
+  
+  const loadGroupData = async (retryCount = 0) => {
     try {
-      // Добавляем cache: 'no-store' чтобы гарантировать свежие данные
+      // Добавляем timestamp чтобы обойти кэш
+      const timestamp = Date.now();
       const [groupRes, expensesRes] = await Promise.all([
-        fetch(`/api/groups/${groupId}`, { cache: 'no-store' }),
-        fetch(`/api/groups/${groupId}/expenses`, { cache: 'no-store' }),
+        fetch(`/api/groups/${groupId}?t=${timestamp}`, { cache: 'no-store' }),
+        fetch(`/api/groups/${groupId}/expenses?t=${timestamp}`, { cache: 'no-store' }),
       ]);
 
       const groupData = await groupRes.json();
       const expensesData = await expensesRes.json();
 
-      console.log('[GroupPage] Loaded group with members:', groupData.group?.members?.length);
+      let loadedGroup = groupData.group;
+      console.log('[GroupPage] Loaded group with members from API:', loadedGroup?.members?.length, '(retry:', retryCount, ')');
       
-      setGroup(groupData.group);
+      // Проверяем локальный кэш участников (для обхода read replica lag)
+      if (loadedGroup && typeof window !== 'undefined') {
+        try {
+          const cachedMembersJson = localStorage.getItem(membersStorageKey);
+          if (cachedMembersJson) {
+            const cachedMembers = JSON.parse(cachedMembersJson);
+            console.log('[GroupPage] Found', cachedMembers.length, 'members in localStorage cache');
+            
+            // Объединяем: берём всех из API + добавляем тех из кэша, кого нет в API
+            const apiMemberIds = new Set(loadedGroup.members.map((m: any) => m.userId));
+            const missingMembers = cachedMembers.filter((m: any) => !apiMemberIds.has(m.userId));
+            
+            if (missingMembers.length > 0) {
+              console.log('[GroupPage] Adding', missingMembers.length, 'members from cache');
+              loadedGroup = {
+                ...loadedGroup,
+                members: [...loadedGroup.members, ...missingMembers],
+              };
+            }
+            
+            // Если API вернул меньше участников чем в кэше — возможно read replica отстаёт
+            // Делаем retry через 500ms (максимум 2 раза)
+            if (loadedGroup.members.length < cachedMembers.length && retryCount < 2) {
+              console.log('[GroupPage] API has fewer members than cache, retrying in 500ms...');
+              setTimeout(() => loadGroupData(retryCount + 1), 500);
+              return;
+            }
+          }
+        } catch (e) {
+          console.warn('[GroupPage] Failed to load cached members:', e);
+        }
+      }
+      
+      setGroup(loadedGroup);
       setExpenses(expensesData.expenses || []);
     } catch (error) {
       console.error('Failed to load group:', error);
@@ -76,15 +114,29 @@ export default function GroupPage() {
     setShowAddMember(true);
   };
 
-  const handleMemberAdded = (updatedGroup?: Group) => {
+  const handleMemberAdded = (newMember: any) => {
     setShowAddMember(false);
-    if (updatedGroup) {
-      // Используем данные группы напрямую из ответа API (без проблем с read replica)
-      console.log('[GroupPage] Using group from API response with', updatedGroup.members?.length, 'members');
-      setGroup(updatedGroup);
-    } else {
-      // Fallback: перезагружаем данные
-      loadGroupData();
+    if (newMember && group) {
+      // Добавляем нового участника к текущему списку (избегаем read replica)
+      console.log('[GroupPage] Adding new member to group:', newMember.user?.firstName);
+      const updatedMembers = [...group.members, newMember];
+      
+      setGroup({
+        ...group,
+        members: updatedMembers,
+      });
+      
+      // Сохраняем в localStorage для обхода read replica при перезагрузке
+      if (typeof window !== 'undefined') {
+        try {
+          localStorage.setItem(membersStorageKey, JSON.stringify(updatedMembers));
+          console.log('[GroupPage] Cached', updatedMembers.length, 'members to localStorage');
+        } catch (e) {
+          console.warn('[GroupPage] Failed to cache members:', e);
+        }
+      }
+      
+      console.log('[GroupPage] Group now has', updatedMembers.length, 'members');
     }
     hapticFeedback('success');
   };

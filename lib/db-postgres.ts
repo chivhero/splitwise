@@ -322,6 +322,18 @@ export async function addGroupMember(
   `;
 }
 
+export async function checkGroupMembership(
+  groupId: string,
+  userId: string
+): Promise<boolean> {
+  const result = await sql`
+    SELECT 1 FROM group_members 
+    WHERE group_id = ${groupId} AND user_id = ${userId}
+    LIMIT 1
+  `;
+  return result.rows.length > 0;
+}
+
 export async function getUserGroups(userId: string): Promise<Group[]> {
   const result = await sql`
     SELECT g.* FROM groups g
@@ -370,12 +382,12 @@ export async function getGroupById(groupId: string): Promise<Group | null> {
   };
 }
 
-export async function getGroupMembers(groupId: string): Promise<GroupMember[]> {
+export async function getGroupMembers(groupId: string, retryCount = 0): Promise<GroupMember[]> {
   // Сначала проверим сколько записей в group_members напрямую
   const countResult = await sql`
     SELECT COUNT(*) as cnt FROM group_members WHERE group_id = ${groupId}
   `;
-  const rawCount = countResult.rows[0]?.cnt || 0;
+  const rawCount = parseInt(countResult.rows[0]?.cnt || '0');
   
   // Явно указываем колонки чтобы избежать конфликтов имён
   const result = await sql`
@@ -398,7 +410,15 @@ export async function getGroupMembers(groupId: string): Promise<GroupMember[]> {
     ORDER BY gm.joined_at ASC
   `;
 
-  console.log(`[getGroupMembers] Raw count: ${rawCount}, JOIN result: ${result.rows.length} for group ${groupId}`);
+  console.log(`[getGroupMembers] Raw count: ${rawCount}, JOIN result: ${result.rows.length} for group ${groupId} (retry: ${retryCount})`);
+  
+  // Если JOIN вернул меньше записей чем COUNT — это read replica lag
+  // Ждём 300ms и пробуем снова (максимум 3 раза)
+  if (result.rows.length < rawCount && retryCount < 3) {
+    console.log(`[getGroupMembers] Read replica lag detected! Waiting 300ms and retrying...`);
+    await new Promise(resolve => setTimeout(resolve, 300));
+    return getGroupMembers(groupId, retryCount + 1);
+  }
 
   return result.rows.map(row => ({
     userId: row.user_id,
