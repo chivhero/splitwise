@@ -44,11 +44,24 @@ export default function SettlementsView({ groupId, group }: SettlementsViewProps
   const currentUserMember = tgUser ? group.members.find(m => m.user?.telegramId === tgUser.id) : null;
   const currentUserId = currentUserMember?.userId;
   
-  const getUserName = (userId: string) => {
+  // Функция для получения имени из объекта user
+  const getNameFromUser = (user: any) => {
+    if (!user) return t('common.unknown');
+    return user.firstName || user.first_name || t('common.unknown');
+  };
+  
+  const getUserName = (userId: string, userObj?: any) => {
     // Если это текущий пользователь - показываем "Вы"/"You"
     if (userId === currentUserId) {
       return t('common.you');
     }
+    
+    // Сначала пробуем использовать переданный объект user (из summary)
+    if (userObj) {
+      return getNameFromUser(userObj);
+    }
+    
+    // Fallback: ищем в group.members
     const member = group.members.find(m => m.userId === userId);
     return member?.user?.firstName || t('common.unknown');
   };
@@ -133,16 +146,16 @@ export default function SettlementsView({ groupId, group }: SettlementsViewProps
             {t('settlements.necessaryTransfers')} ({summary.settlements.length})
           </h3>
           <div className="space-y-3">
-            {summary.settlements.map((settlement, index) => (
+            {summary.settlements.map((settlement: any, index: number) => (
               <div key={index} className="card border-l-4 border-white/30 hover:border-white/50 transition-all">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3 flex-1">
                     <div className="font-semibold text-white">
-                      {getUserName(settlement.from)}
+                      {getUserName(settlement.from, settlement.fromUser)}
                     </div>
                     <ArrowRight size={20} className="text-white/60" />
                     <div className="font-semibold text-white">
-                      {getUserName(settlement.to)}
+                      {getUserName(settlement.to, settlement.toUser)}
                     </div>
                   </div>
                   <div className="font-bold text-white text-lg">
@@ -159,10 +172,10 @@ export default function SettlementsView({ groupId, group }: SettlementsViewProps
       <div>
         <h3 className="font-semibold mb-3 text-white/80">{t('settlements.membersBalance')}</h3>
         <div className="space-y-2">
-          {summary.balances.map((balance) => (
+          {summary.balances.map((balance: any) => (
             <div key={balance.userId} className="card">
               <div className="flex items-center justify-between">
-                <span className="font-medium text-white">{getUserName(balance.userId)}</span>
+                <span className="font-medium text-white">{getUserName(balance.userId, balance.user)}</span>
                 <span
                   className={`font-semibold ${
                     balance.balance > 0.01

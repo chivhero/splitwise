@@ -70,10 +70,22 @@ export async function POST(
     console.log('[API /groups/join] Adding user to group:', { userId: user.id, groupId });
     await addGroupMember(groupId, user.id);
 
-    // Получаем обновлённую группу
-    const updatedGroup = await getGroupById(groupId);
+    // Вместо повторного чтения из БД (может попасть на read replica),
+    // вручную конструируем обновлённую группу с новым участником
+    const newMember = {
+      userId: user.id,
+      groupId: groupId,
+      role: 'member',
+      joinedAt: new Date(),
+      user: user,
+    };
+    
+    const updatedGroup = {
+      ...group,
+      members: [...group.members, newMember],
+    };
 
-    console.log('[API /groups/join] Successfully added user to group');
+    console.log('[API /groups/join] Successfully added user to group. Total members:', updatedGroup.members.length);
     return NextResponse.json({ 
       message: 'Successfully joined group',
       group: updatedGroup 

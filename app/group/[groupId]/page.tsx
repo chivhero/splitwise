@@ -67,7 +67,8 @@ export default function GroupPage() {
     setExpenses([expense, ...expenses]);
     setShowAddExpense(false);
     hapticFeedback('success');
-    loadGroupData(); // Перезагружаем данные для обновления балансов
+    // НЕ вызываем loadGroupData() здесь, чтобы не перезаписать свежие данные группы старыми с read replica
+    // Балансы обновятся при переключении на вкладку "Баланс" через компонент SettlementsView
   };
 
   const handleAddMember = () => {
