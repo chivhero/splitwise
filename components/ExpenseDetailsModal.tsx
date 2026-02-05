@@ -59,6 +59,11 @@ export default function ExpenseDetailsModal({
   // Загрузка items и комментариев
   useEffect(() => {
     loadData();
+    
+    // Expand Telegram WebApp to full screen
+    if (typeof window !== 'undefined' && (window as any).Telegram?.WebApp) {
+      (window as any).Telegram.WebApp.expand();
+    }
   }, [expense.id]);
 
   const loadData = async () => {
@@ -359,14 +364,14 @@ export default function ExpenseDetailsModal({
           </div>
 
           {/* Comments Section */}
-          <div>
+          <div className="pb-20">
             <h3 className="text-lg font-semibold text-white mb-3 flex items-center gap-2">
               <MessageSquare size={20} />
               {t('expenses.comments')}
             </h3>
 
             {/* Comments List */}
-            <div className="space-y-2 mb-3 max-h-64 overflow-y-auto">
+            <div className="space-y-2 mb-3">
               {comments.length === 0 && !loading && (
                 <p className="text-white/40 text-sm text-center py-4">
                   {t('expenses.noComments')}
@@ -397,23 +402,31 @@ export default function ExpenseDetailsModal({
               ))}
             </div>
 
-            {/* Add Comment Input */}
-            <div className="flex gap-2">
-              <input
-                type="text"
-                value={newCommentText}
-                onChange={(e) => setNewCommentText(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && handleAddComment()}
-                placeholder={t('expenses.addCommentPlaceholder')}
-                className="flex-1 px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-white/20 transition-all"
-              />
-              <button
-                onClick={handleAddComment}
-                disabled={!newCommentText.trim() || adding}
-                className="px-4 py-3 rounded-xl bg-white/20 border border-white/30 text-white hover:bg-white/30 transition-all disabled:opacity-50 font-medium"
-              >
-                <MessageSquare size={20} />
-              </button>
+            {/* Add Comment Input - Sticky at bottom */}
+            <div className="sticky bottom-0 left-0 right-0 bg-gradient-to-t from-[#1a1a1a] via-[#1a1a1a] to-transparent pt-4 pb-2">
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={newCommentText}
+                  onChange={(e) => setNewCommentText(e.target.value)}
+                  onKeyDown={(e) => e.key === 'Enter' && handleAddComment()}
+                  onFocus={(e) => {
+                    // Scroll input into view when focused
+                    setTimeout(() => {
+                      e.target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }, 300);
+                  }}
+                  placeholder={t('expenses.addCommentPlaceholder')}
+                  className="flex-1 px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-white/20 transition-all"
+                />
+                <button
+                  onClick={handleAddComment}
+                  disabled={!newCommentText.trim() || adding}
+                  className="px-4 py-3 rounded-xl bg-white/20 border border-white/30 text-white hover:bg-white/30 transition-all disabled:opacity-50 font-medium flex-shrink-0"
+                >
+                  <MessageSquare size={20} />
+                </button>
+              </div>
             </div>
           </div>
         </div>
