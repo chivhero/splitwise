@@ -289,6 +289,7 @@ export default function GroupPage() {
           telegramId={telegramId}
           onClose={() => setShowAddExpense(false)}
           onExpenseAdded={handleExpenseAdded}
+          onMemberAdded={handleMemberAdded}
         />
       )}
 

@@ -11,9 +11,10 @@ interface AddExpenseModalProps {
   group: Group;
   onClose: () => void;
   onExpenseAdded: (expense: Expense) => void;
+  onMemberAdded?: (member: GroupMember) => void;
 }
 
-export default function AddExpenseModal({ telegramId, group, onClose, onExpenseAdded }: AddExpenseModalProps) {
+export default function AddExpenseModal({ telegramId, group, onClose, onExpenseAdded, onMemberAdded }: AddExpenseModalProps) {
   const { t } = useLanguage();
   const [description, setDescription] = useState('');
   const [amount, setAmount] = useState('');
@@ -102,6 +103,9 @@ export default function AddExpenseModal({ telegramId, group, onClose, onExpenseA
         
         // 4. Автоматически добавляем нового участника в "С кем делить"
         setSplitBetween([...splitBetween, newMember.userId]);
+        
+        // 5. Уведомляем родительский компонент об обновлении
+        onMemberAdded?.(newMember);
         
         hapticFeedback('success');
         setShowAddMember(false);
