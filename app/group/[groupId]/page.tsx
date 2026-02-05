@@ -24,6 +24,7 @@ export default function GroupPage() {
   const [showAddMember, setShowAddMember] = useState(false);
   const [activeTab, setActiveTab] = useState<'expenses' | 'settlements'>('expenses');
   const [telegramId, setTelegramId] = useState<number | null>(null);
+  const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
 
   useEffect(() => {
     const tgUser = getTelegramUser();
@@ -268,6 +269,7 @@ export default function GroupPage() {
               expenses={expenses} 
               group={group} 
               onExpenseDeleted={loadGroupData}
+              onModalOpen={setIsDetailsModalOpen}
             />
           )
         ) : (
@@ -276,7 +278,7 @@ export default function GroupPage() {
       </div>
 
       {/* Floating Action Button with Glass Effect */}
-      {activeTab === 'expenses' && expenses.length > 0 && (
+      {activeTab === 'expenses' && expenses.length > 0 && !isDetailsModalOpen && (
         <button
           onClick={handleAddExpense}
           className="fixed bottom-6 right-6 backdrop-blur-xl bg-white/20 hover:bg-white/30 border border-white/30 text-white w-16 h-16 rounded-2xl shadow-glass-xl hover:shadow-glass-2xl flex items-center justify-center transition-all duration-300 active:scale-95 z-50 group"

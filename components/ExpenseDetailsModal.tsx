@@ -87,23 +87,38 @@ export default function ExpenseDetailsModal({
 
   // Добавить item
   const handleAddItem = async () => {
-    if (!newItemText.trim() || adding || !currentUserId) return;
+    if (!newItemText.trim() || adding) return;
 
     try {
       setAdding(true);
+      
+      // Используем либо userId, либо telegramId
+      const payload: any = {
+        description: newItemText.trim(),
+      };
+      
+      if (currentUserId) {
+        payload.userId = currentUserId;
+      } else if (tgUser?.id) {
+        payload.telegramId = tgUser.id;
+      } else {
+        console.error('No user identification available');
+        return;
+      }
+      
       const res = await fetch(`/api/groups/${expense.groupId}/expenses/${expense.id}/items`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          description: newItemText.trim(),
-          userId: currentUserId,
-        }),
+        body: JSON.stringify(payload),
       });
 
       if (res.ok) {
         const { item } = await res.json();
         setItems(prev => [...prev, item]);
         setNewItemText('');
+      } else {
+        const errorData = await res.json();
+        console.error('Failed to add item:', errorData);
       }
     } catch (error) {
       console.error('Failed to add item:', error);
@@ -154,23 +169,38 @@ export default function ExpenseDetailsModal({
 
   // Добавить комментарий
   const handleAddComment = async () => {
-    if (!newCommentText.trim() || adding || !currentUserId) return;
+    if (!newCommentText.trim() || adding) return;
 
     try {
       setAdding(true);
+      
+      // Используем либо userId, либо telegramId
+      const payload: any = {
+        text: newCommentText.trim(),
+      };
+      
+      if (currentUserId) {
+        payload.userId = currentUserId;
+      } else if (tgUser?.id) {
+        payload.telegramId = tgUser.id;
+      } else {
+        console.error('No user identification available');
+        return;
+      }
+      
       const res = await fetch(`/api/groups/${expense.groupId}/expenses/${expense.id}/comments`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          text: newCommentText.trim(),
-          userId: currentUserId,
-        }),
+        body: JSON.stringify(payload),
       });
 
       if (res.ok) {
         const { comment } = await res.json();
         setComments(prev => [...prev, comment]);
         setNewCommentText('');
+      } else {
+        const errorData = await res.json();
+        console.error('Failed to add comment:', errorData);
       }
     } catch (error) {
       console.error('Failed to add comment:', error);

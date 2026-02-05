@@ -12,9 +12,10 @@ interface ExpenseListProps {
   expenses: Expense[];
   group: Group;
   onExpenseDeleted?: () => void;
+  onModalOpen?: (isOpen: boolean) => void;
 }
 
-export default function ExpenseList({ expenses, group, onExpenseDeleted }: ExpenseListProps) {
+export default function ExpenseList({ expenses, group, onExpenseDeleted, onModalOpen }: ExpenseListProps) {
   const { t, locale } = useLanguage();
   const [selectedExpense, setSelectedExpense] = useState<Expense | null>(null);
   
@@ -88,7 +89,10 @@ export default function ExpenseList({ expenses, group, onExpenseDeleted }: Expen
           <div
             key={expense.id}
             className="card cursor-pointer hover:bg-white/10 transition"
-            onClick={() => setSelectedExpense(expense)}
+            onClick={() => {
+              setSelectedExpense(expense);
+              onModalOpen?.(true);
+            }}
           >
             <div className="flex items-start gap-3">
               <div className="text-2xl">{getCategoryEmoji(expense.category)}</div>
@@ -120,7 +124,10 @@ export default function ExpenseList({ expenses, group, onExpenseDeleted }: Expen
         <ExpenseDetailsModal
           expense={selectedExpense}
           group={group}
-          onClose={() => setSelectedExpense(null)}
+          onClose={() => {
+            setSelectedExpense(null);
+            onModalOpen?.(false);
+          }}
           onDelete={handleDeleteExpense}
           onEdit={() => {
             // TODO: Implement edit functionality
