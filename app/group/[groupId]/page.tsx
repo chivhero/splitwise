@@ -170,7 +170,7 @@ export default function GroupPage() {
   }
 
   return (
-    <div className="min-h-screen pb-20 relative overflow-hidden">
+    <div className="min-h-screen pb-24 relative overflow-hidden">
       {/* Animated Background */}
       <div className="fixed inset-0 pointer-events-none">
         <div className="absolute top-20 left-10 w-72 h-72 bg-white/5 rounded-full blur-3xl animate-float"></div>
@@ -194,17 +194,18 @@ export default function GroupPage() {
             <p className="text-white/70 text-sm mb-4 ml-14">{group.description}</p>
           )}
 
-          <div className="flex gap-2 overflow-x-auto ml-14">
+          {/* Action Buttons Grid */}
+          <div className="grid grid-cols-2 gap-3 ml-14 pb-2">
             <button
               onClick={handleAddMember}
-              className="flex items-center gap-2 px-4 py-2.5 backdrop-blur-xl bg-white/10 hover:bg-white/20 rounded-xl transition-all border border-white/20 hover:border-white/30 whitespace-nowrap text-white"
+              className="flex items-center justify-center gap-2 px-4 py-3 backdrop-blur-xl bg-white/10 hover:bg-white/20 rounded-xl transition-all border border-white/20 hover:border-white/30 text-white w-full"
             >
               <UserPlus size={18} />
               <span className="text-sm font-medium">{t('createGroup.addMembers')}</span>
             </button>
             <button
               onClick={handleShareLink}
-              className="flex items-center gap-2 px-4 py-2.5 backdrop-blur-xl bg-white/10 hover:bg-white/20 rounded-xl transition-all border border-white/20 hover:border-white/30 whitespace-nowrap text-white"
+              className="flex items-center justify-center gap-2 px-4 py-3 backdrop-blur-xl bg-white/10 hover:bg-white/20 rounded-xl transition-all border border-white/20 hover:border-white/30 text-white w-full"
             >
               <Users size={18} />
               <span className="text-sm font-medium">{t('common.share')}</span>

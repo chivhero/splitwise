@@ -486,12 +486,27 @@ export async function createExpense(
   };
 }
 
-export async function getGroupExpenses(groupId: string): Promise<Expense[]> {
+export async function getGroupExpenses(groupId: string, retryCount = 0): Promise<Expense[]> {
+  // Получаем COUNT и данные
+  const countResult = await sql`
+    SELECT COUNT(*) as cnt FROM expenses WHERE group_id = ${groupId}
+  `;
+  const expectedCount = parseInt(countResult.rows[0]?.cnt || '0');
+  
   const result = await sql`
     SELECT * FROM expenses
     WHERE group_id = ${groupId}
     ORDER BY date DESC, created_at DESC
   `;
+
+  console.log(`[getGroupExpenses] COUNT: ${expectedCount}, SELECT: ${result.rows.length} for group ${groupId} (retry: ${retryCount})`);
+
+  // Если SELECT вернул меньше чем COUNT — read replica lag
+  if (result.rows.length < expectedCount && retryCount < 3) {
+    console.log(`[getGroupExpenses] Read replica lag detected! Waiting 300ms and retrying...`);
+    await new Promise(resolve => setTimeout(resolve, 300));
+    return getGroupExpenses(groupId, retryCount + 1);
+  }
 
   return result.rows.map(row => ({
     id: row.id,

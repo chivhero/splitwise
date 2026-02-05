@@ -22,7 +22,11 @@ export default function Home() {
   const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
+    console.log('[Home] useEffect started');
+    console.log('[Home] window.Telegram:', typeof window !== 'undefined' ? window.Telegram : 'undefined');
+    
     const tgUser = getTelegramUser();
+    console.log('[Home] getTelegramUser() returned:', tgUser);
     
     if (!tgUser) {
       console.warn('[Home] No Telegram user found - waiting for authentication...');
