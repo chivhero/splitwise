@@ -1,8 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import { Expense, Group } from '@/types';
-import { X } from 'lucide-react';
+import { Expense, Group, GroupMember } from '@/types';
+import { X, UserPlus } from 'lucide-react';
 import { hapticFeedback, showTelegramPopup } from '@/lib/telegram';
 import { useLanguage } from '@/contexts/LanguageContext';
 
@@ -18,8 +18,11 @@ export default function AddExpenseModal({ telegramId, group, onClose, onExpenseA
   const [description, setDescription] = useState('');
   const [amount, setAmount] = useState('');
   
+  // Локальный список участников (для мгновенного обновления UI)
+  const [localMembers, setLocalMembers] = useState<GroupMember[]>(group.members);
+  
   // Находим текущего пользователя
-  const currentUserMember = group.members.find(m => m.user?.telegramId === telegramId);
+  const currentUserMember = localMembers.find(m => m.user?.telegramId === telegramId);
   const currentUserId = currentUserMember?.userId;
   
   const [paidBy, setPaidBy] = useState<string>(currentUserId || '');
@@ -27,6 +30,11 @@ export default function AddExpenseModal({ telegramId, group, onClose, onExpenseA
   const [category, setCategory] = useState('other');
   const [loading, setLoading] = useState(false);
   const [paidByError, setPaidByError] = useState(false);
+  
+  // Состояния для добавления нового участника
+  const [showAddMember, setShowAddMember] = useState(false);
+  const [newMemberName, setNewMemberName] = useState('');
+  const [addingMember, setAddingMember] = useState(false);
 
   const categories = [
     { id: 'food', emoji: '🍔' },
@@ -46,6 +54,66 @@ export default function AddExpenseModal({ telegramId, group, onClose, onExpenseA
       setSplitBetween([...splitBetween, userId]);
     }
     hapticFeedback('light');
+  };
+
+  const handleAddNewMember = async () => {
+    if (!newMemberName.trim()) {
+      showTelegramPopup(t('addMember.nameRequired') || 'Введите имя');
+      return;
+    }
+
+    setAddingMember(true);
+    hapticFeedback('light');
+
+    try {
+      // 1. Создаем пользователя по имени
+      const createUserRes = await fetch('/api/users/create-by-name', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          firstName: newMemberName.trim()
+        }),
+      });
+
+      if (!createUserRes.ok) {
+        throw new Error('Failed to create user');
+      }
+
+      const userData = await createUserRes.json();
+      const newUserId = userData.user.id;
+
+      // 2. Добавляем пользователя в группу
+      const joinRes = await fetch(`/api/groups/${group.id}/join`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: newUserId }),
+      });
+
+      if (!joinRes.ok) {
+        throw new Error('Failed to join group');
+      }
+
+      const joinData = await joinRes.json();
+      const newMember = joinData.member;
+
+      if (newMember) {
+        // 3. Мгновенно обновляем локальный список участников
+        setLocalMembers([...localMembers, newMember]);
+        
+        // 4. Автоматически добавляем нового участника в "С кем делить"
+        setSplitBetween([...splitBetween, newMember.userId]);
+        
+        hapticFeedback('success');
+        setShowAddMember(false);
+        setNewMemberName('');
+      }
+    } catch (error) {
+      console.error('Failed to add member:', error);
+      showTelegramPopup(t('addMember.error') || 'Ошибка добавления участника');
+      hapticFeedback('error');
+    } finally {
+      setAddingMember(false);
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -120,6 +188,68 @@ export default function AddExpenseModal({ telegramId, group, onClose, onExpenseA
     return lastName ? `${firstName} ${lastName}` : firstName;
   };
 
+  const renderAddMemberButton = () => (
+    <button
+      type="button"
+      onClick={() => {
+        setShowAddMember(true);
+        hapticFeedback('light');
+      }}
+      className="w-full p-3 rounded-xl border-2 border-dashed border-white/20 hover:border-white/40 hover:bg-white/5 transition-all flex items-center justify-center gap-2 text-white/60 hover:text-white"
+    >
+      <UserPlus size={18} />
+      <span className="text-sm font-medium">{t('addMember.add') || '+ Добавить участника'}</span>
+    </button>
+  );
+
+  const renderAddMemberForm = () => {
+    if (!showAddMember) return null;
+    
+    return (
+      <div className="p-4 rounded-xl bg-white/5 border border-white/20 space-y-3">
+        <div className="flex items-center justify-between">
+          <label className="text-sm font-medium text-white/80">
+            {t('addMember.newMemberName') || 'Имя нового участника'}
+          </label>
+          <button
+            type="button"
+            onClick={() => {
+              setShowAddMember(false);
+              setNewMemberName('');
+            }}
+            className="text-white/60 hover:text-white"
+          >
+            <X size={18} />
+          </button>
+        </div>
+        <input
+          type="text"
+          value={newMemberName}
+          onChange={(e) => setNewMemberName(e.target.value)}
+          placeholder={t('addMember.namePlaceholder') || 'Например: Олег'}
+          className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-white/20 transition-all"
+          maxLength={50}
+          disabled={addingMember}
+          autoFocus
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') {
+              e.preventDefault();
+              handleAddNewMember();
+            }
+          }}
+        />
+        <button
+          type="button"
+          onClick={handleAddNewMember}
+          disabled={addingMember || !newMemberName.trim()}
+          className="w-full px-4 py-3 rounded-xl bg-white/20 border border-white/30 text-white hover:bg-white/30 transition-all disabled:opacity-50 font-medium"
+        >
+          {addingMember ? (t('common.adding') || 'Добавление...') : (t('common.add') || 'Добавить')}
+        </button>
+      </div>
+    );
+  };
+
   return (
     <div className="fixed inset-0 z-50 animate-fade-in">
       <div className="h-[100dvh] w-full bg-gradient-to-b from-[#1a1a1a] to-[#0a0a0a] flex flex-col">
@@ -191,7 +321,7 @@ export default function AddExpenseModal({ telegramId, group, onClose, onExpenseA
           <div>
             <label className="block text-sm font-medium mb-2 text-white/80">{t('expenses.paidByLabel')} *</label>
             <div className={`space-y-2 max-h-48 overflow-y-auto rounded-xl ${paidByError ? 'ring-2 ring-red-500' : ''}`}>
-              {group.members.map((member) => {
+              {localMembers.map((member) => {
                 const memberName = getMemberName(member);
                 const isSelected = paidBy === member.userId;
                 
@@ -218,6 +348,8 @@ export default function AddExpenseModal({ telegramId, group, onClose, onExpenseA
                   </button>
                 );
               })}
+              {!showAddMember && renderAddMemberButton()}
+              {renderAddMemberForm()}
             </div>
             {paidByError && (
               <p className="text-xs text-red-400 mt-2">{t('expenses.paidByRequired')}</p>
@@ -229,7 +361,7 @@ export default function AddExpenseModal({ telegramId, group, onClose, onExpenseA
               {t('expenses.splitBetweenLabel')} *
             </label>
             <div className="space-y-2 max-h-48 overflow-y-auto rounded-xl">
-              {group.members.map((member) => {
+              {localMembers.map((member) => {
                 const isSelected = splitBetween.includes(member.userId);
                 return (
                   <button
