@@ -121,13 +121,16 @@ export default function AddExpenseModal({ telegramId, group, onClose, onExpenseA
   };
 
   return (
-    <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 animate-fade-in p-4">
-      <div className="bg-black/30 backdrop-blur-xl border border-white/10 w-full max-w-lg rounded-3xl shadow-2xl max-h-[90vh] flex flex-col">
-        {/* Header */}
-        <div className="flex items-center justify-between p-6 pb-4 border-b border-white/10 flex-shrink-0">
-          <h2 className="text-xl font-bold text-white">{t('expenses.add')}</h2>
-          <button onClick={onClose} className="text-white/60 hover:text-white">
-            <X size={24} />
+    <div className="fixed inset-0 z-50 animate-fade-in">
+      <div className="h-[100dvh] w-full bg-gradient-to-b from-[#1a1a1a] to-[#0a0a0a] flex flex-col">
+        {/* Header with Close Button */}
+        <div className="flex items-center justify-between px-6 pt-8 pb-4 border-b border-white/10 flex-shrink-0 bg-gradient-to-b from-black/40 to-transparent backdrop-blur-xl">
+          <h2 className="text-2xl font-bold text-white">{t('expenses.add')}</h2>
+          <button 
+            onClick={onClose} 
+            className="text-white/70 hover:text-white active:scale-95 transition-all p-2 hover:bg-white/10 rounded-xl"
+          >
+            <X size={28} />
           </button>
         </div>
 
@@ -259,12 +262,12 @@ export default function AddExpenseModal({ telegramId, group, onClose, onExpenseA
 
         </form>
 
-        {/* Actions - fixed at bottom */}
-        <div className="flex gap-3 p-6 pt-4 border-t border-white/10 flex-shrink-0">
+        {/* Actions - fixed at bottom with safe area padding */}
+        <div className="flex gap-3 px-6 pt-4 pb-8 border-t border-white/10 flex-shrink-0 bg-gradient-to-t from-black/40 to-transparent backdrop-blur-xl">
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 px-6 py-3 rounded-xl bg-white/5 border border-white/10 text-white hover:bg-white/10 transition-all"
+              className="flex-1 px-6 py-4 rounded-xl bg-white/5 border border-white/10 text-white hover:bg-white/10 transition-all font-medium text-base"
               disabled={loading}
             >
             {t('common.cancel')}
@@ -278,7 +281,7 @@ export default function AddExpenseModal({ telegramId, group, onClose, onExpenseA
                 form.requestSubmit();
               }
             }}
-            className="flex-1 px-6 py-3 rounded-xl bg-white/10 border border-white/20 text-white hover:bg-white/20 transition-all disabled:opacity-50" 
+            className="flex-1 px-6 py-4 rounded-xl bg-white/20 border border-white/30 text-white hover:bg-white/30 transition-all disabled:opacity-50 font-semibold text-base" 
             disabled={loading}
           >
             {loading ? t('expenses.adding') : t('expenses.add')}
