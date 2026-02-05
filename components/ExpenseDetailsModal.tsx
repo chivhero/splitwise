@@ -23,8 +23,6 @@ export default function ExpenseDetailsModal({
   onDelete,
   onEdit,
 }: ExpenseDetailsModalProps) {
-  console.log('ExpenseDetailsModal rendered for expense:', expense.id);
-  
   const { t, locale } = useLanguage();
   const tgUser = getTelegramUser();
   const currentUserMember = tgUser ? group.members.find(m => m.user?.telegramId === tgUser.id) : null;
@@ -198,69 +196,71 @@ export default function ExpenseDetailsModal({
   };
 
   return (
-    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[9999] flex items-center justify-center p-0">
-      {/* Full Screen Modal */}
-      <div className="bg-gradient-to-b from-purple-900/95 to-indigo-900/95 backdrop-blur-xl h-[100dvh] w-full flex flex-col" onClick={(e) => e.stopPropagation()}>
+    <div className="fixed inset-0 z-50 animate-fade-in">
+      <div className="h-[100dvh] w-full bg-gradient-to-b from-[#1a1a1a] to-[#0a0a0a] flex flex-col">
         {/* Header */}
-        <div className="px-6 pt-8 pb-4 border-b border-white/10">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-2xl font-bold text-white">{t('expenses.details')}</h2>
-            <button
-              onClick={onClose}
-              className="p-2 hover:bg-white/10 rounded-full transition"
-            >
-              <X size={28} className="text-white" />
-            </button>
-          </div>
+        <div className="flex items-center justify-between px-6 pt-8 pb-4 border-b border-white/10 flex-shrink-0 bg-gradient-to-b from-black/40 to-transparent backdrop-blur-xl">
+          <h2 className="text-2xl font-bold text-white">{t('expenses.details')}</h2>
+          <button
+            onClick={onClose}
+            className="text-white/70 hover:text-white active:scale-95 transition-all p-2 hover:bg-white/10 rounded-xl"
+          >
+            <X size={28} />
+          </button>
+        </div>
 
-          {/* Основная информация */}
-          <div className="flex items-start gap-3 mb-3">
-            <div className="text-3xl">{getCategoryEmoji(expense.category)}</div>
-            <div className="flex-1">
-              <h3 className="font-semibold text-xl text-white mb-1">{expense.description}</h3>
-              <p className="text-sm text-white/70">
-                {t('expenses.paidByName', { name: getUserName(expense.paidBy) })}
-              </p>
-              <p className="text-xs text-white/60 mt-1">
-                {format(new Date(expense.date), 'd MMMM yyyy, HH:mm', {
-                  locale: locale === 'ru' ? ru : enUS,
-                })}
-              </p>
-            </div>
-            <div className="text-right">
-              <p className="text-2xl font-bold text-white">
-                {expense.amount.toFixed(2)} {expense.currency}
-              </p>
-              <p className="text-xs text-white/60 mt-1">
-                {expense.splitBetween.length} {t('common.members')}
-              </p>
-            </div>
-          </div>
+        {/* Expense Info Card */}
+        <div className="px-6 pt-4 pb-4 border-b border-white/10 flex-shrink-0">
+          <div className="bg-white/5 border border-white/10 rounded-xl p-4">
 
-          {/* Action Buttons */}
-          <div className="flex gap-2">
-            {onEdit && (
-              <button
-                onClick={onEdit}
-                className="flex-1 bg-white/10 hover:bg-white/20 text-white py-2 px-4 rounded-lg transition flex items-center justify-center gap-2"
-              >
-                <Edit2 size={18} />
-                <span>{t('common.edit')}</span>
-              </button>
-            )}
-            {onDelete && (
-              <button
-                onClick={onDelete}
-                className="flex-1 bg-red-500/20 hover:bg-red-500/30 text-red-300 py-2 px-4 rounded-lg transition flex items-center justify-center gap-2"
-              >
-                <Trash2 size={18} />
-                <span>{t('common.delete')}</span>
-              </button>
-            )}
+            <div className="flex items-start gap-3 mb-4">
+              <div className="text-3xl">{getCategoryEmoji(expense.category)}</div>
+              <div className="flex-1">
+                <h3 className="font-semibold text-xl text-white mb-1">{expense.description}</h3>
+                <p className="text-sm text-white/70">
+                  {t('expenses.paidByName', { name: getUserName(expense.paidBy) })}
+                </p>
+                <p className="text-xs text-white/60 mt-1">
+                  {format(new Date(expense.date), 'd MMMM yyyy, HH:mm', {
+                    locale: locale === 'ru' ? ru : enUS,
+                  })}
+                </p>
+              </div>
+              <div className="text-right">
+                <p className="text-2xl font-bold text-white">
+                  {expense.amount.toFixed(2)} {expense.currency}
+                </p>
+                <p className="text-xs text-white/60 mt-1">
+                  {expense.splitBetween.length} {t('common.members')}
+                </p>
+              </div>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex gap-2">
+              {onEdit && (
+                <button
+                  onClick={onEdit}
+                  className="flex-1 bg-white/10 border border-white/20 hover:bg-white/20 text-white py-3 px-4 rounded-xl transition-all flex items-center justify-center gap-2 font-medium"
+                >
+                  <Edit2 size={18} />
+                  <span>{t('common.edit')}</span>
+                </button>
+              )}
+              {onDelete && (
+                <button
+                  onClick={onDelete}
+                  className="flex-1 bg-red-500/20 border border-red-500/30 hover:bg-red-500/30 text-red-300 py-3 px-4 rounded-xl transition-all flex items-center justify-center gap-2 font-medium"
+                >
+                  <Trash2 size={18} />
+                  <span>{t('common.delete')}</span>
+                </button>
+              )}
+            </div>
           </div>
         </div>
 
-        {/* Content */}
+        {/* Content - scrollable */}
         <div className="flex-1 overflow-y-auto px-6 py-4 space-y-6">
           {/* Checklist Section */}
           <div>
@@ -277,12 +277,12 @@ export default function ExpenseDetailsModal({
                 onChange={(e) => setNewItemText(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && handleAddItem()}
                 placeholder={t('expenses.addItemPlaceholder')}
-                className="flex-1 bg-white/10 border border-white/20 rounded-lg px-4 py-2 text-white placeholder:text-white/40"
+                className="flex-1 px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-white/20 transition-all"
               />
               <button
                 onClick={handleAddItem}
                 disabled={!newItemText.trim() || adding}
-                className="bg-purple-600 hover:bg-purple-700 disabled:opacity-50 text-white px-4 py-2 rounded-lg transition"
+                className="px-4 py-3 rounded-xl bg-white/20 border border-white/30 text-white hover:bg-white/30 transition-all disabled:opacity-50 font-medium"
               >
                 <Plus size={20} />
               </button>
@@ -298,13 +298,13 @@ export default function ExpenseDetailsModal({
               {items.map((item) => (
                 <div
                   key={item.id}
-                  className="flex items-center gap-3 bg-white/5 rounded-lg p-3 group"
+                  className="flex items-center gap-3 bg-white/5 border border-white/10 rounded-xl p-3 group hover:border-white/20 transition-all"
                 >
                   <button
                     onClick={() => handleToggleItem(item.id, item.isChecked)}
-                    className={`w-6 h-6 rounded border-2 flex items-center justify-center transition ${
+                    className={`w-6 h-6 rounded-lg border-2 flex items-center justify-center transition-all flex-shrink-0 ${
                       item.isChecked
-                        ? 'bg-green-500 border-green-500'
+                        ? 'bg-white/20 border-white/40'
                         : 'border-white/30 hover:border-white/50'
                     }`}
                   >
@@ -319,7 +319,7 @@ export default function ExpenseDetailsModal({
                   </span>
                   <button
                     onClick={() => handleDeleteItem(item.id)}
-                    className="opacity-0 group-hover:opacity-100 text-red-400 hover:text-red-300 transition"
+                    className="opacity-0 group-hover:opacity-100 text-red-400 hover:text-red-300 transition p-1"
                   >
                     <Trash2 size={16} />
                   </button>
@@ -336,14 +336,14 @@ export default function ExpenseDetailsModal({
             </h3>
 
             {/* Comments List */}
-            <div className="space-y-3 mb-3 max-h-64 overflow-y-auto">
+            <div className="space-y-2 mb-3 max-h-64 overflow-y-auto">
               {comments.length === 0 && !loading && (
                 <p className="text-white/40 text-sm text-center py-4">
                   {t('expenses.noComments')}
                 </p>
               )}
               {comments.map((comment) => (
-                <div key={comment.id} className="bg-white/5 rounded-lg p-3 group">
+                <div key={comment.id} className="bg-white/5 border border-white/10 rounded-xl p-3 group hover:border-white/20 transition-all">
                   <div className="flex items-center gap-2 mb-1">
                     <span className="font-semibold text-white text-sm">
                       {getUserName(comment.createdBy)}
@@ -356,7 +356,7 @@ export default function ExpenseDetailsModal({
                     {comment.createdBy === currentUserId && (
                       <button
                         onClick={() => handleDeleteComment(comment.id)}
-                        className="ml-auto opacity-0 group-hover:opacity-100 text-red-400 hover:text-red-300 transition"
+                        className="ml-auto opacity-0 group-hover:opacity-100 text-red-400 hover:text-red-300 transition p-1"
                       >
                         <Trash2 size={14} />
                       </button>
@@ -375,12 +375,12 @@ export default function ExpenseDetailsModal({
                 onChange={(e) => setNewCommentText(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && handleAddComment()}
                 placeholder={t('expenses.addCommentPlaceholder')}
-                className="flex-1 bg-white/10 border border-white/20 rounded-lg px-4 py-2 text-white placeholder:text-white/40"
+                className="flex-1 px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-white/20 transition-all"
               />
               <button
                 onClick={handleAddComment}
                 disabled={!newCommentText.trim() || adding}
-                className="bg-purple-600 hover:bg-purple-700 disabled:opacity-50 text-white px-4 py-2 rounded-lg transition"
+                className="px-4 py-3 rounded-xl bg-white/20 border border-white/30 text-white hover:bg-white/30 transition-all disabled:opacity-50 font-medium"
               >
                 <MessageSquare size={20} />
               </button>
