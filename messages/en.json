@@ -17,7 +17,8 @@
     "share": "Share",
     "unknown": "Unknown",
     "loadFailed": "Failed to load data",
-    "you": "You"
+    "you": "You",
+    "members": "members"
   },
   "home": {
     "title": "SplitWise - Split expenses easily",
@@ -84,7 +85,14 @@
       "other": "Other"
     },
     "error": "Error adding expense",
-    "connectionError": "Connection error"
+    "connectionError": "Connection error",
+    "details": "Expense Details",
+    "checklist": "Checklist",
+    "addItemPlaceholder": "Add item...",
+    "noItems": "No items yet",
+    "comments": "Comments",
+    "addCommentPlaceholder": "Write a comment...",
+    "noComments": "No comments yet"
   },
   "settlements": {
     "title": "Settlements",

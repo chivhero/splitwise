@@ -17,7 +17,8 @@
     "share": "Поделиться",
     "unknown": "Неизвестный",
     "loadFailed": "Не удалось загрузить данные",
-    "you": "Вы"
+    "you": "Вы",
+    "members": "участников"
   },
   "home": {
     "title": "SplitWise - Делим расходы легко",
@@ -84,7 +85,14 @@
       "other": "Другое"
     },
     "error": "Ошибка добавления расхода",
-    "connectionError": "Ошибка соединения"
+    "connectionError": "Ошибка соединения",
+    "details": "Детали расхода",
+    "checklist": "Чек-лист",
+    "addItemPlaceholder": "Добавить пункт...",
+    "noItems": "Нет пунктов",
+    "comments": "Комментарии",
+    "addCommentPlaceholder": "Написать комментарий...",
+    "noComments": "Нет комментариев"
   },
   "settlements": {
     "title": "Расчеты",

@@ -101,12 +101,42 @@ export async function initDB() {
       )
     `;
 
+    // Expense Items table (checklist for expenses)
+    await sql`
+      CREATE TABLE IF NOT EXISTS expense_items (
+        id TEXT PRIMARY KEY,
+        expense_id TEXT NOT NULL,
+        description TEXT NOT NULL,
+        is_checked BOOLEAN DEFAULT FALSE,
+        created_by TEXT NOT NULL,
+        created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+        FOREIGN KEY (expense_id) REFERENCES expenses(id) ON DELETE CASCADE,
+        FOREIGN KEY (created_by) REFERENCES users(id)
+      )
+    `;
+
+    // Expense Comments table (discussion for expenses)
+    await sql`
+      CREATE TABLE IF NOT EXISTS expense_comments (
+        id TEXT PRIMARY KEY,
+        expense_id TEXT NOT NULL,
+        text TEXT NOT NULL,
+        created_by TEXT NOT NULL,
+        created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+        FOREIGN KEY (expense_id) REFERENCES expenses(id) ON DELETE CASCADE,
+        FOREIGN KEY (created_by) REFERENCES users(id)
+      )
+    `;
+
     // Create indexes
     await sql`CREATE INDEX IF NOT EXISTS idx_group_members ON group_members(group_id)`;
     await sql`CREATE INDEX IF NOT EXISTS idx_expenses_group ON expenses(group_id)`;
     await sql`CREATE INDEX IF NOT EXISTS idx_users_telegram ON users(telegram_id)`;
     await sql`CREATE INDEX IF NOT EXISTS idx_promo_codes_code ON promo_codes(code)`;
     await sql`CREATE INDEX IF NOT EXISTS idx_promo_redemptions_user ON promo_redemptions(user_id)`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_expense_items_expense ON expense_items(expense_id)`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_expense_comments_expense ON expense_comments(expense_id)`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_expense_comments_date ON expense_comments(created_at DESC)`;
 
     console.log('✅ PostgreSQL database initialized');
   } catch (error) {
@@ -667,6 +697,142 @@ export async function isUserAdmin(userId: string): Promise<boolean> {
   `;
 
   return result.rows.length > 0 && result.rows[0].is_admin === true;
+}
+
+// ============================================
+// EXPENSE ITEMS OPERATIONS (Checklist)
+// ============================================
+
+export async function createExpenseItem(
+  expenseId: string,
+  description: string,
+  createdBy: string
+): Promise<any> {
+  const id = `item_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+  
+  const result = await sql`
+    INSERT INTO expense_items (id, expense_id, description, is_checked, created_by, created_at)
+    VALUES (${id}, ${expenseId}, ${description}, FALSE, ${createdBy}, NOW())
+    RETURNING *
+  `;
+
+  const row = result.rows[0];
+  return {
+    id: row.id,
+    expenseId: row.expense_id,
+    description: row.description,
+    isChecked: row.is_checked,
+    createdBy: row.created_by,
+    createdAt: new Date(row.created_at),
+  };
+}
+
+export async function getExpenseItems(expenseId: string): Promise<any[]> {
+  const result = await sql`
+    SELECT 
+      ei.*,
+      u.id as creator_id,
+      u.first_name as creator_first_name,
+      u.last_name as creator_last_name
+    FROM expense_items ei
+    LEFT JOIN users u ON ei.created_by = u.id
+    WHERE ei.expense_id = ${expenseId}
+    ORDER BY ei.created_at ASC
+  `;
+
+  return result.rows.map(row => ({
+    id: row.id,
+    expenseId: row.expense_id,
+    description: row.description,
+    isChecked: row.is_checked,
+    createdBy: row.created_by,
+    createdAt: new Date(row.created_at),
+    createdByUser: row.creator_id ? {
+      id: row.creator_id,
+      firstName: row.creator_first_name,
+      lastName: row.creator_last_name,
+    } : undefined,
+  }));
+}
+
+export async function toggleExpenseItem(itemId: string, isChecked: boolean): Promise<void> {
+  await sql`
+    UPDATE expense_items 
+    SET is_checked = ${isChecked}
+    WHERE id = ${itemId}
+  `;
+}
+
+export async function deleteExpenseItem(itemId: string): Promise<void> {
+  await sql`
+    DELETE FROM expense_items WHERE id = ${itemId}
+  `;
+}
+
+// ============================================
+// EXPENSE COMMENTS OPERATIONS
+// ============================================
+
+export async function createExpenseComment(
+  expenseId: string,
+  text: string,
+  createdBy: string
+): Promise<any> {
+  const id = `comment_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+  
+  const result = await sql`
+    INSERT INTO expense_comments (id, expense_id, text, created_by, created_at)
+    VALUES (${id}, ${expenseId}, ${text}, ${createdBy}, NOW())
+    RETURNING *
+  `;
+
+  const row = result.rows[0];
+  return {
+    id: row.id,
+    expenseId: row.expense_id,
+    text: row.text,
+    createdBy: row.created_by,
+    createdAt: new Date(row.created_at),
+  };
+}
+
+export async function getExpenseComments(expenseId: string): Promise<any[]> {
+  const result = await sql`
+    SELECT 
+      ec.*,
+      u.id as creator_id,
+      u.telegram_id as creator_telegram_id,
+      u.first_name as creator_first_name,
+      u.last_name as creator_last_name,
+      u.username as creator_username,
+      u.photo_url as creator_photo_url
+    FROM expense_comments ec
+    LEFT JOIN users u ON ec.created_by = u.id
+    WHERE ec.expense_id = ${expenseId}
+    ORDER BY ec.created_at ASC
+  `;
+
+  return result.rows.map(row => ({
+    id: row.id,
+    expenseId: row.expense_id,
+    text: row.text,
+    createdBy: row.created_by,
+    createdAt: new Date(row.created_at),
+    createdByUser: row.creator_id ? {
+      id: row.creator_id,
+      telegramId: row.creator_telegram_id,
+      firstName: row.creator_first_name,
+      lastName: row.creator_last_name,
+      username: row.creator_username,
+      photoUrl: row.creator_photo_url,
+    } : undefined,
+  }));
+}
+
+export async function deleteExpenseComment(commentId: string): Promise<void> {
+  await sql`
+    DELETE FROM expense_comments WHERE id = ${commentId}
+  `;
 }
 
 

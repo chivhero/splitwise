@@ -52,6 +52,17 @@ export const redeemPromoCode = db.redeemPromoCode;
 export const hasUserRedeemedPromo = db.hasUserRedeemedPromo;
 export const isUserAdmin = db.isUserAdmin;
 
+// Expense Items (Checklist)
+export const createExpenseItem = db.createExpenseItem;
+export const getExpenseItems = db.getExpenseItems;
+export const toggleExpenseItem = db.toggleExpenseItem;
+export const deleteExpenseItem = db.deleteExpenseItem;
+
+// Expense Comments
+export const createExpenseComment = db.createExpenseComment;
+export const getExpenseComments = db.getExpenseComments;
+export const deleteExpenseComment = db.deleteExpenseComment;
+
 export default db.default || db;
 
 

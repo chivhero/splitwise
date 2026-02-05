@@ -264,7 +264,11 @@ export default function GroupPage() {
               </button>
             </div>
           ) : (
-            <ExpenseList expenses={expenses} group={group} />
+            <ExpenseList 
+              expenses={expenses} 
+              group={group} 
+              onExpenseDeleted={loadGroupData}
+            />
           )
         ) : (
           <SettlementsView groupId={groupId} group={group} />

@@ -95,6 +95,25 @@ export interface AdminStats {
   totalPromoCodes: number;
 }
 
+export interface ExpenseItem {
+  id: string;
+  expenseId: string;
+  description: string;
+  isChecked: boolean;
+  createdBy: string;
+  createdAt: Date;
+  createdByUser?: User;
+}
+
+export interface ExpenseComment {
+  id: string;
+  expenseId: string;
+  text: string;
+  createdBy: string;
+  createdAt: Date;
+  createdByUser?: User;
+}
+
 
 
 
