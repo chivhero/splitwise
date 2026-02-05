@@ -88,7 +88,10 @@ export default function ExpenseList({ expenses, group, onExpenseDeleted }: Expen
           <div
             key={expense.id}
             className="card cursor-pointer hover:bg-white/10 transition"
-            onClick={() => setSelectedExpense(expense)}
+            onClick={() => {
+              console.log('Expense clicked:', expense.id);
+              setSelectedExpense(expense);
+            }}
           >
             <div className="flex items-start gap-3">
               <div className="text-2xl">{getCategoryEmoji(expense.category)}</div>

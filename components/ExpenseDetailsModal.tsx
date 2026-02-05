@@ -23,6 +23,8 @@ export default function ExpenseDetailsModal({
   onDelete,
   onEdit,
 }: ExpenseDetailsModalProps) {
+  console.log('ExpenseDetailsModal rendered for expense:', expense.id);
+  
   const { t, locale } = useLanguage();
   const tgUser = getTelegramUser();
   const currentUserMember = tgUser ? group.members.find(m => m.user?.telegramId === tgUser.id) : null;
@@ -196,9 +198,9 @@ export default function ExpenseDetailsModal({
   };
 
   return (
-    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-0">
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[9999] flex items-center justify-center p-0">
       {/* Full Screen Modal */}
-      <div className="bg-gradient-to-b from-purple-900/95 to-indigo-900/95 backdrop-blur-xl h-[100dvh] w-full flex flex-col">
+      <div className="bg-gradient-to-b from-purple-900/95 to-indigo-900/95 backdrop-blur-xl h-[100dvh] w-full flex flex-col" onClick={(e) => e.stopPropagation()}>
         {/* Header */}
         <div className="px-6 pt-8 pb-4 border-b border-white/10">
           <div className="flex items-center justify-between mb-4">
