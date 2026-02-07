@@ -33,7 +33,7 @@ export async function POST(request: NextRequest) {
       prices: [
         {
           label: 'SplitWise Premium (1 месяц)',
-          amount: 100, // 100 звёзд = 1 месяц премиума
+          amount: 50, // 50 звёзд = 1 месяц премиума
         },
       ],
     };
