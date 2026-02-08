@@ -1,0 +1,6 @@
+{
+  "build": "tribute-integration-v2",
+  "date": "2026-02-08T17:00:00Z",
+  "commit": "d45e33c",
+  "features": ["tribute-payment", "100-rub-price"]
+}

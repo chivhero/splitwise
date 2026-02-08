@@ -9,7 +9,14 @@ const TRIBUTE_PRODUCT_ID = process.env.TRIBUTE_PRODUCT_ID;
  */
 export async function POST(request: NextRequest) {
   try {
+    // Логируем наличие переменных (не значения!)
+    console.log('🔍 Tribute env check:', {
+      hasProductLink: !!TRIBUTE_PRODUCT_LINK,
+      hasProductId: !!TRIBUTE_PRODUCT_ID,
+    });
+
     if (!TRIBUTE_PRODUCT_LINK) {
+      console.error('❌ TRIBUTE_PRODUCT_LINK not configured in environment');
       return NextResponse.json(
         { error: 'Tribute product link not configured' },
         { status: 500 }

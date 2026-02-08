@@ -168,17 +168,24 @@ export function openPremiumInvoice(callback?: (status: string) => void) {
   const webApp = getTelegramWebApp();
   const tgUser = getTelegramUser();
   
+  console.log('💳 openPremiumInvoice called - using TRIBUTE payment');
+  
   if (webApp && tgUser) {
     // Получаем ссылку на Tribute товар
+    console.log('📞 Calling /api/payments/tribute/create-link');
     fetch('/api/payments/tribute/create-link', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ telegramId: tgUser.id }),
     })
-      .then(res => res.json())
+      .then(res => {
+        console.log('📥 API Response status:', res.status);
+        return res.json();
+      })
       .then(data => {
+        console.log('📦 API Response data:', data);
         if (data.paymentUrl) {
-          console.log('💳 Opening Tribute payment:', data.paymentUrl);
+          console.log('✅ Opening Tribute payment:', data.paymentUrl);
           
           // Открываем ссылку Tribute в новой вкладке/окне
           // Tribute автоматически определит пользователя через Telegram Mini App
@@ -204,11 +211,12 @@ export function openPremiumInvoice(callback?: (status: string) => void) {
             }, 3000);
           }
         } else {
+          console.error('❌ No paymentUrl in response:', data);
           showTelegramPopup('Ошибка создания платежа. Попробуйте позже.');
         }
       })
       .catch(err => {
-        console.error('Failed to create payment link:', err);
+        console.error('❌ Failed to create payment link:', err);
         showTelegramPopup('Ошибка создания платежа. Попробуйте позже.');
       });
   } else {

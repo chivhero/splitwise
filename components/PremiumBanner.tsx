@@ -12,6 +12,13 @@ export default function PremiumBanner() {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
+    // Логируем загруженные переводы для диагностики
+    console.log('🌍 i18n loaded:', {
+      locale,
+      bannerDescription: t('premium.bannerDescription'),
+      activateButton: t('premium.activateButton'),
+    });
+
     const checkPremiumStatus = async () => {
       const tgUser = getTelegramUser();
       if (tgUser) {
