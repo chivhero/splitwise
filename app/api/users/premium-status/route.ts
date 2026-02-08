@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getUserByTelegramId } from '@/lib/db-postgres';
 
+/**
+ * Проверка Premium статуса пользователя
+ * GET /api/users/premium-status?telegramId=123456
+ */
 export async function GET(request: NextRequest) {
   try {
     const searchParams = request.nextUrl.searchParams;
@@ -22,14 +26,12 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Проверяем, активен ли премиум
-    const isPremium = user.isPremium && 
-      user.premiumUntil && 
-      new Date(user.premiumUntil) > new Date();
+    const isPremium = user.premiumUntil ? new Date(user.premiumUntil) > new Date() : false;
 
     return NextResponse.json({
       isPremium,
       premiumUntil: user.premiumUntil,
+      success: true,
     });
   } catch (error) {
     console.error('Error checking premium status:', error);

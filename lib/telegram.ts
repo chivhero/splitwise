@@ -163,34 +163,53 @@ export function shareGroupLink(groupId: string, groupName: string) {
   }
 }
 
-// Telegram Payments
+// Tribute Payments
 export function openPremiumInvoice(callback?: (status: string) => void) {
   const webApp = getTelegramWebApp();
   const tgUser = getTelegramUser();
   
   if (webApp && tgUser) {
-    // URL будет генерироваться на бэкенде
-    fetch('/api/payments/create-invoice', {
+    // Получаем ссылку на Tribute товар
+    fetch('/api/payments/tribute/create-link', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ telegramId: tgUser.id }),
     })
       .then(res => res.json())
       .then(data => {
-        if (data.invoiceUrl) {
-          webApp.openInvoice(data.invoiceUrl, (status) => {
-            if (status === 'paid') {
-              hapticFeedback('success');
-            }
-            callback?.(status);
-          });
+        if (data.paymentUrl) {
+          console.log('💳 Opening Tribute payment:', data.paymentUrl);
+          
+          // Открываем ссылку Tribute в новой вкладке/окне
+          // Tribute автоматически определит пользователя через Telegram Mini App
+          webApp.openLink(data.paymentUrl);
+          
+          // После успешной оплаты Tribute отправит вебхук
+          // Можно показать пользователю сообщение
+          hapticFeedback('light');
+          
+          // Вызываем callback (если нужно обновить UI)
+          // Примечание: статус будет обновлен через вебхук автоматически
+          if (callback) {
+            // Проверяем статус через 3 секунды (время на оплату)
+            setTimeout(() => {
+              fetch(`/api/users/premium-status?telegramId=${tgUser.id}`)
+                .then(r => r.json())
+                .then(d => {
+                  if (d.isPremium) {
+                    callback('paid');
+                  }
+                })
+                .catch(err => console.error('Failed to check status:', err));
+            }, 3000);
+          }
         } else {
-          showTelegramPopup('Ошибка создания счёта. Попробуйте позже.');
+          showTelegramPopup('Ошибка создания платежа. Попробуйте позже.');
         }
       })
       .catch(err => {
-        console.error('Failed to create invoice:', err);
-        showTelegramPopup('Ошибка создания счёта. Попробуйте позже.');
+        console.error('Failed to create payment link:', err);
+        showTelegramPopup('Ошибка создания платежа. Попробуйте позже.');
       });
   } else {
     showTelegramPopup('Платежи доступны только в Telegram приложении.');
