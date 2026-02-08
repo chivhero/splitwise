@@ -11,6 +11,10 @@ const inter = Inter({ subsets: ['latin', 'cyrillic'] });
 export const metadata: Metadata = {
   title: 'SplitWise - Делим расходы легко',
   description: 'Простое приложение для разделения расходов с друзьями',
+  other: {
+    'app-version': 'tribute-v3-' + Date.now(),
+    'cache-control': 'no-cache, no-store, must-revalidate',
+  },
 };
 
 export default function RootLayout({

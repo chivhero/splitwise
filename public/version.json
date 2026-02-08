@@ -1,6 +1,7 @@
 {
-  "build": "tribute-integration-v2",
-  "date": "2026-02-08T17:00:00Z",
-  "commit": "d45e33c",
-  "features": ["tribute-payment", "100-rub-price"]
+  "build": "tribute-integration-v3",
+  "date": "2026-02-08T18:00:00Z",
+  "commit": "016f6d2",
+  "features": ["tribute-payment", "100-rub-price", "cache-busting"],
+  "note": "If you see old price ($2.99) - Telegram WebApp cache issue"
 }

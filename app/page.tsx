@@ -21,6 +21,15 @@ export default function Home() {
   const [telegramId, setTelegramId] = useState<number | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
 
+  // ДИАГНОСТИКА: Показываем какие переводы загружены в bundle
+  useEffect(() => {
+    console.log('🔍 [BUNDLE CONTENT CHECK]');
+    console.log('📦 Build version: tribute-v3');
+    console.log('🌍 Current locale:', locale);
+    console.log('💰 Premium banner text:', t('premium.bannerDescription'));
+    console.log('🔘 Premium button text:', t('premium.activateButton'));
+  }, [locale, t]);
+
   useEffect(() => {
     console.log('[Home] useEffect started');
     console.log('[Home] window.Telegram:', typeof window !== 'undefined' ? window.Telegram : 'undefined');
@@ -136,6 +145,11 @@ export default function Home() {
 
   return (
     <div key={locale} className="min-h-screen pb-20 relative overflow-hidden">
+      {/* Build Version Indicator */}
+      <div className="fixed top-2 right-2 z-50 text-[10px] text-white/30 font-mono">
+        v.tribute-3
+      </div>
+
       {/* Animated Background */}
       <div className="fixed inset-0 pointer-events-none">
         <div className="absolute top-20 left-10 w-72 h-72 bg-white/5 rounded-full blur-3xl animate-float"></div>
