@@ -90,11 +90,31 @@ export interface PromoRedemption {
 }
 
 export interface AdminStats {
+  // User metrics
   totalUsers: number;
-  totalGroups: number;
-  totalExpenses: number;
+  realUsers: number;           // Users with telegram_id
+  fakeUsers: number;           // Users without telegram_id (manually added)
+  activeUsers: number;         // Users active in last 7 days
   premiumUsers: number;
+  premiumExpiring: number;     // Premium expiring in next 7 days
+  weeklyNewUsers: number;      // New users in last 7 days
+  monthlyNewUsers: number;     // New users in last 30 days
+  
+  // Group metrics
+  totalGroups: number;
+  activeGroups: number;        // Groups with expenses in last 30 days
+  inactiveGroups: number;      // Groups with no expenses in last 30 days
+  
+  // Expense metrics
+  totalExpenses: number;
+  customSplitExpenses: number; // Expenses using custom split
+  totalVolume: number;         // Sum of all expense amounts
+  todayExpenses: number;       // Expenses created today
+  weeklyExpenses: number;      // Expenses created in last 7 days
+  
+  // Promo codes
   totalPromoCodes: number;
+  activePromoCodes: number;    // Active promo codes
 }
 
 export interface ExpenseItem {

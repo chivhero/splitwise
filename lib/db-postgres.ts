@@ -602,20 +602,102 @@ export async function healthCheck(): Promise<boolean> {
 }
 
 export async function getStats() {
-  const [users, groups, expenses, premiumUsers, promoCodes] = await Promise.all([
+  const now = new Date();
+  const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+  const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+  const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const sevenDaysLater = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
+
+  const [
+    users,
+    realUsers,
+    fakeUsers,
+    activeUsers,
+    premiumUsers,
+    premiumExpiring,
+    weeklyNewUsers,
+    monthlyNewUsers,
+    groups,
+    activeGroups,
+    expenses,
+    customSplitExpenses,
+    totalVolume,
+    todayExpenses,
+    weeklyExpenses,
+    promoCodes,
+    activePromoCodes,
+  ] = await Promise.all([
+    // User metrics
     sql`SELECT COUNT(*) as count FROM users`,
-    sql`SELECT COUNT(*) as count FROM groups`,
-    sql`SELECT COUNT(*) as count FROM expenses`,
+    sql`SELECT COUNT(*) as count FROM users WHERE telegram_id IS NOT NULL`,
+    sql`SELECT COUNT(*) as count FROM users WHERE telegram_id IS NULL`,
+    sql`
+      SELECT COUNT(DISTINCT u.id) as count 
+      FROM users u
+      INNER JOIN expenses e ON u.id = e.created_by
+      WHERE e.created_at >= ${sevenDaysAgo.toISOString()}
+    `,
     sql`SELECT COUNT(*) as count FROM users WHERE is_premium = TRUE`,
+    sql`
+      SELECT COUNT(*) as count FROM users 
+      WHERE is_premium = TRUE 
+      AND premium_until IS NOT NULL 
+      AND premium_until <= ${sevenDaysLater.toISOString()}
+      AND premium_until > NOW()
+    `,
+    sql`SELECT COUNT(*) as count FROM users WHERE created_at >= ${sevenDaysAgo.toISOString()}`,
+    sql`SELECT COUNT(*) as count FROM users WHERE created_at >= ${thirtyDaysAgo.toISOString()}`,
+    
+    // Group metrics
+    sql`SELECT COUNT(*) as count FROM groups`,
+    sql`
+      SELECT COUNT(DISTINCT group_id) as count
+      FROM expenses
+      WHERE created_at >= ${thirtyDaysAgo.toISOString()}
+    `,
+    
+    // Expense metrics
+    sql`SELECT COUNT(*) as count FROM expenses`,
+    sql`SELECT COUNT(*) as count FROM expenses WHERE split_type = 'custom'`,
+    sql`SELECT COALESCE(SUM(amount), 0) as total FROM expenses`,
+    sql`SELECT COUNT(*) as count FROM expenses WHERE created_at >= ${todayStart.toISOString()}`,
+    sql`SELECT COUNT(*) as count FROM expenses WHERE created_at >= ${sevenDaysAgo.toISOString()}`,
+    
+    // Promo codes
     sql`SELECT COUNT(*) as count FROM promo_codes`,
+    sql`SELECT COUNT(*) as count FROM promo_codes WHERE is_active = TRUE`,
   ]);
 
+  const totalUsers = parseInt(users.rows[0].count);
+  const totalGroups = parseInt(groups.rows[0].count);
+  const activeGroupsCount = parseInt(activeGroups.rows[0].count);
+
   return {
-    totalUsers: parseInt(users.rows[0].count),
-    totalGroups: parseInt(groups.rows[0].count),
-    totalExpenses: parseInt(expenses.rows[0].count),
+    // User metrics
+    totalUsers,
+    realUsers: parseInt(realUsers.rows[0].count),
+    fakeUsers: parseInt(fakeUsers.rows[0].count),
+    activeUsers: parseInt(activeUsers.rows[0].count),
     premiumUsers: parseInt(premiumUsers.rows[0].count),
+    premiumExpiring: parseInt(premiumExpiring.rows[0].count),
+    weeklyNewUsers: parseInt(weeklyNewUsers.rows[0].count),
+    monthlyNewUsers: parseInt(monthlyNewUsers.rows[0].count),
+    
+    // Group metrics
+    totalGroups,
+    activeGroups: activeGroupsCount,
+    inactiveGroups: totalGroups - activeGroupsCount,
+    
+    // Expense metrics
+    totalExpenses: parseInt(expenses.rows[0].count),
+    customSplitExpenses: parseInt(customSplitExpenses.rows[0].count),
+    totalVolume: parseFloat(totalVolume.rows[0].total || '0'),
+    todayExpenses: parseInt(todayExpenses.rows[0].count),
+    weeklyExpenses: parseInt(weeklyExpenses.rows[0].count),
+    
+    // Promo codes
     totalPromoCodes: parseInt(promoCodes.rows[0].count),
+    activePromoCodes: parseInt(activePromoCodes.rows[0].count),
   };
 }
 
