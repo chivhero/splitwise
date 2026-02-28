@@ -63,6 +63,9 @@ export const createExpenseComment = db.createExpenseComment;
 export const getExpenseComments = db.getExpenseComments;
 export const deleteExpenseComment = db.deleteExpenseComment;
 
+// Reminders
+export const getActiveUsersForReminder = db.getActiveUsersForReminder;
+
 export default db.default || db;
 
 

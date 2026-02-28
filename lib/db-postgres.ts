@@ -835,6 +835,61 @@ export async function deleteExpenseComment(commentId: string): Promise<void> {
   `;
 }
 
+// ============================================
+// REMINDER SYSTEM
+// ============================================
+
+export interface ReminderUser {
+  telegramId: number;
+  firstName: string;
+  username?: string;
+  locale?: string;
+  activeGroupsCount: number;
+  lastExpenseAt?: Date;
+}
+
+/**
+ * Returns users eligible for weekly Friday reminders:
+ * - Must have a Telegram ID (can receive messages)
+ * - Must be a member of at least one group
+ * - Must have had at least one expense activity in the last 90 days
+ *   (either created an expense or been in a group where an expense was added)
+ */
+export async function getActiveUsersForReminder(): Promise<ReminderUser[]> {
+  const result = await sql`
+    SELECT
+      u.telegram_id,
+      u.first_name,
+      u.username,
+      COUNT(DISTINCT gm.group_id)              AS active_groups_count,
+      MAX(e.created_at)                        AS last_expense_at
+    FROM users u
+    INNER JOIN group_members gm ON u.id = gm.user_id
+    INNER JOIN groups g ON gm.group_id = g.id
+    LEFT JOIN expenses e
+      ON e.group_id = gm.group_id
+      AND e.created_at > NOW() - INTERVAL '90 days'
+    WHERE
+      u.telegram_id IS NOT NULL
+      AND EXISTS (
+        SELECT 1
+        FROM expenses e2
+        WHERE e2.group_id = gm.group_id
+          AND e2.created_at > NOW() - INTERVAL '90 days'
+      )
+    GROUP BY u.telegram_id, u.first_name, u.username
+    ORDER BY last_expense_at DESC
+  `;
+
+  return result.rows.map(row => ({
+    telegramId: Number(row.telegram_id),
+    firstName: row.first_name,
+    username: row.username ?? undefined,
+    activeGroupsCount: Number(row.active_groups_count),
+    lastExpenseAt: row.last_expense_at ? new Date(row.last_expense_at) : undefined,
+  }));
+}
+
 
 
 
