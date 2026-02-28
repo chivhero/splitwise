@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getUserByTelegramId } from '@/lib/db-postgres';
 import { sendFridayReminder, buildFridayMessage } from '@/lib/telegram-bot';
-import { isUserAdmin } from '@/lib/db-adapter';
+import { isAdminTelegramId } from '@/lib/admin';
 import { getActiveUsersForReminder } from '@/lib/db-adapter';
 
 /**
@@ -29,15 +29,14 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'telegramId is required' }, { status: 400 });
     }
 
-    // ── Admin check ──────────────────────────────────────────────────────────
+    // ── Admin check (по ADMIN_TELEGRAM_IDS из env, не колонке is_admin в БД) ─
+    if (!isAdminTelegramId(telegramId)) {
+      return NextResponse.json({ error: 'Forbidden: admin only' }, { status: 403 });
+    }
+
     const admin = await getUserByTelegramId(telegramId);
     if (!admin) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 });
-    }
-
-    const adminCheck = await isUserAdmin(admin.id);
-    if (!adminCheck) {
-      return NextResponse.json({ error: 'Forbidden: admin only' }, { status: 403 });
     }
 
     // ── Preview mode — just return the rendered message text ──────────────
