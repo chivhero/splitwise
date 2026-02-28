@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Expense, Group, GroupMember } from '@/types';
 import { X, UserPlus } from 'lucide-react';
 import { hapticFeedback, showTelegramPopup } from '@/lib/telegram';
@@ -32,6 +32,10 @@ export default function AddExpenseModal({ telegramId, group, onClose, onExpenseA
   const [loading, setLoading] = useState(false);
   const [paidByError, setPaidByError] = useState(false);
   
+  // Custom split state
+  const [splitType, setSplitType] = useState<'equal' | 'custom'>('equal');
+  const [customShares, setCustomShares] = useState<Record<string, number>>({});
+  
   // Состояния для добавления нового участника
   const [showAddMember, setShowAddMember] = useState(false);
   const [newMemberName, setNewMemberName] = useState('');
@@ -46,15 +50,71 @@ export default function AddExpenseModal({ telegramId, group, onClose, onExpenseA
     { id: 'other', emoji: '💰' },
   ];
 
+  // Initialize custom shares when participants change
+  useEffect(() => {
+    if (splitType === 'custom') {
+      const newShares: Record<string, number> = {};
+      splitBetween.forEach(userId => {
+        newShares[userId] = customShares[userId] || 1;
+      });
+      setCustomShares(newShares);
+    }
+  }, [splitBetween, splitType]);
+
   const toggleMember = (userId: string) => {
     if (splitBetween.includes(userId)) {
       if (splitBetween.length > 1) {
-        setSplitBetween(splitBetween.filter(id => id !== userId));
+        const newSplitBetween = splitBetween.filter(id => id !== userId);
+        setSplitBetween(newSplitBetween);
+        
+        // Remove from custom shares if exists
+        if (splitType === 'custom') {
+          const newShares = { ...customShares };
+          delete newShares[userId];
+          setCustomShares(newShares);
+        }
       }
     } else {
       setSplitBetween([...splitBetween, userId]);
+      
+      // Add to custom shares with default value 1
+      if (splitType === 'custom') {
+        setCustomShares({ ...customShares, [userId]: 1 });
+      }
     }
     hapticFeedback('light');
+  };
+  
+  const handleShareChange = (userId: string, value: number) => {
+    if (value < 1) return; // Don't allow less than 1
+    setCustomShares({ ...customShares, [userId]: value });
+  };
+  
+  const resetAllShares = () => {
+    const reset: Record<string, number> = {};
+    splitBetween.forEach(userId => {
+      reset[userId] = 1;
+    });
+    setCustomShares(reset);
+    hapticFeedback('light');
+  };
+  
+  // Calculate preview based on split type
+  const calculatePreview = () => {
+    if (!amount || splitBetween.length === 0) return null;
+    
+    const amountNum = parseFloat(amount);
+    if (isNaN(amountNum)) return null;
+    
+    if (splitType === 'equal') {
+      const perPerson = amountNum / splitBetween.length;
+      return { perPerson, shares: null };
+    } else {
+      const totalShares = Object.values(customShares).reduce((sum, s) => sum + (s || 0), 0);
+      if (totalShares === 0) return null;
+      const pricePerShare = amountNum / totalShares;
+      return { perPerson: null, pricePerShare, totalShares };
+    }
   };
 
   const handleAddNewMember = async () => {
@@ -150,6 +210,17 @@ export default function AddExpenseModal({ telegramId, group, onClose, onExpenseA
     setLoading(true);
     hapticFeedback('light');
 
+    // Validate custom split if selected
+    if (splitType === 'custom') {
+      for (const userId of splitBetween) {
+        if (!customShares[userId] || customShares[userId] < 1) {
+          showTelegramPopup('Укажите доли для всех участников (минимум 1)');
+          setLoading(false);
+          return;
+        }
+      }
+    }
+
     try {
       const response = await fetch(`/api/groups/${group.id}/expenses`, {
         method: 'POST',
@@ -161,6 +232,8 @@ export default function AddExpenseModal({ telegramId, group, onClose, onExpenseA
           splitBetweenUserIds: splitBetween,
           telegramId,
           category,
+          splitType,
+          customSplits: splitType === 'custom' ? customShares : undefined,
         }),
       });
 
@@ -389,12 +462,141 @@ export default function AddExpenseModal({ telegramId, group, onClose, onExpenseA
                 );
               })}
             </div>
-            {splitBetween.length > 0 && (
-              <p className="text-xs text-white/60 mt-2">
-                {(parseFloat(amount) / splitBetween.length || 0).toFixed(2)} {group.currency} {t('expenses.perPerson')}
-              </p>
-            )}
           </div>
+
+          {/* Split Type Selector */}
+          {splitBetween.length > 0 && (
+            <div className="space-y-3">
+              <label className="block text-sm font-medium text-white/80">
+                Как разделить расход?
+              </label>
+              
+              <div className="grid grid-cols-2 gap-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSplitType('equal');
+                    hapticFeedback('light');
+                  }}
+                  className={`p-3 rounded-xl border-2 text-sm transition-all ${
+                    splitType === 'equal'
+                      ? 'border-white/40 bg-white/10 font-semibold'
+                      : 'border-white/10 hover:border-white/20 hover:bg-white/5'
+                  }`}
+                  disabled={loading}
+                >
+                  <div className="text-xl mb-1">⚖️</div>
+                  <div className="text-xs text-white/80">Поровну</div>
+                </button>
+                
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSplitType('custom');
+                    // Initialize shares for all participants
+                    const initialShares: Record<string, number> = {};
+                    splitBetween.forEach(userId => {
+                      initialShares[userId] = customShares[userId] || 1;
+                    });
+                    setCustomShares(initialShares);
+                    hapticFeedback('light');
+                  }}
+                  className={`p-3 rounded-xl border-2 text-sm transition-all ${
+                    splitType === 'custom'
+                      ? 'border-white/40 bg-white/10 font-semibold'
+                      : 'border-white/10 hover:border-white/20 hover:bg-white/5'
+                  }`}
+                  disabled={loading}
+                >
+                  <div className="text-xl mb-1">🎯</div>
+                  <div className="text-xs text-white/80">По долям</div>
+                </button>
+              </div>
+
+              {/* Custom Shares Input */}
+              {splitType === 'custom' && (
+                <div className="space-y-3 p-4 rounded-xl bg-white/5 border border-white/10">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-xs font-medium text-white/70">Укажите доли для каждого:</span>
+                    <button
+                      type="button"
+                      onClick={resetAllShares}
+                      className="text-xs text-white/50 hover:text-white/80 underline"
+                    >
+                      Всем по 1
+                    </button>
+                  </div>
+                  
+                  {splitBetween.map(userId => {
+                    const member = localMembers.find(m => m.userId === userId);
+                    if (!member) return null;
+                    
+                    return (
+                      <div key={userId} className="flex items-center gap-3">
+                        <span className="flex-1 text-sm text-white truncate">
+                          {getMemberName(member)}
+                        </span>
+                        <input
+                          type="number"
+                          min="1"
+                          step="1"
+                          value={customShares[userId] || ''}
+                          onChange={(e) => handleShareChange(userId, parseInt(e.target.value) || 0)}
+                          className="w-20 px-3 py-2 rounded-lg bg-white/10 border border-white/20 text-white text-center focus:outline-none focus:ring-2 focus:ring-white/30"
+                          disabled={loading}
+                        />
+                        <span className="text-xs text-white/50 w-12">
+                          {customShares[userId] === 1 ? 'доля' : 'долей'}
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+
+              {/* Preview Calculation */}
+              {(() => {
+                const preview = calculatePreview();
+                if (!preview) return null;
+                
+                return (
+                  <div className="p-3 rounded-xl bg-white/5 border border-white/10">
+                    <div className="text-xs font-medium text-white/70 mb-2">Расчёт:</div>
+                    {splitType === 'equal' && preview.perPerson !== null && (
+                      <div className="text-sm text-white">
+                        <span className="text-white/60">По </span>
+                        <span className="font-bold">{preview.perPerson.toFixed(2)} {group.currency}</span>
+                        <span className="text-white/60"> на человека</span>
+                      </div>
+                    )}
+                    {splitType === 'custom' && preview.pricePerShare && preview.totalShares && (
+                      <div className="space-y-1">
+                        <div className="text-xs text-white/60">
+                          Всего долей: {preview.totalShares} | Цена доли: {preview.pricePerShare.toFixed(2)} {group.currency}
+                        </div>
+                        <div className="space-y-0.5">
+                          {splitBetween.map(userId => {
+                            const member = localMembers.find(m => m.userId === userId);
+                            const shares = customShares[userId] || 0;
+                            const amount = (preview.pricePerShare || 0) * shares;
+                            if (!member) return null;
+                            return (
+                              <div key={userId} className="text-xs flex justify-between">
+                                <span className="text-white/70">{getMemberName(member)}:</span>
+                                <span className="text-white font-medium">
+                                  {shares} × {(preview.pricePerShare || 0).toFixed(2)} = {amount.toFixed(2)} {group.currency}
+                                </span>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                );
+              })()}
+            </div>
+          )}
 
         </form>
 

@@ -92,7 +92,19 @@
     "noItems": "Нет пунктов",
     "comments": "Комментарии",
     "addCommentPlaceholder": "Написать комментарий...",
-    "noComments": "Нет комментариев"
+    "noComments": "Нет комментариев",
+    "splitTypeLabel": "Как разделить расход?",
+    "splitEqual": "Поровну",
+    "splitCustom": "По долям",
+    "customSplitsLabel": "Укажите доли для каждого:",
+    "resetShares": "Всем по 1",
+    "shares": "долей",
+    "share": "доля",
+    "totalShares": "Всего долей",
+    "pricePerShare": "Цена доли",
+    "calculation": "Расчёт",
+    "shareBreakdown": "Распределение по долям",
+    "customBadge": "по долям"
   },
   "settlements": {
     "title": "Расчеты",

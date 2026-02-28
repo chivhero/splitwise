@@ -481,20 +481,44 @@ export async function createExpense(
   createdBy: string,
   currency = 'USD',
   category?: string,
-  date?: Date
+  date?: Date,
+  splitType: 'equal' | 'custom' = 'equal',
+  customSplits?: Record<string, number>
 ): Promise<Expense> {
   const id = `expense_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
   const expenseDate = date || new Date();
   
+  // Validation: if custom split, customSplits must be provided
+  if (splitType === 'custom' && !customSplits) {
+    throw new Error('customSplits required when splitType is "custom"');
+  }
+  
+  // Validation: all participants must have shares in customSplits
+  if (splitType === 'custom' && customSplits) {
+    const customSplitsKeys = new Set(Object.keys(customSplits));
+    const participantsSet = new Set(splitBetween);
+    
+    for (const userId of splitBetween) {
+      if (!customSplitsKeys.has(userId)) {
+        throw new Error(`User ${userId} missing from customSplits`);
+      }
+      if (customSplits[userId] < 1) {
+        throw new Error(`Shares must be >= 1 for user ${userId}`);
+      }
+    }
+  }
+  
   const result = await sql`
     INSERT INTO expenses (
       id, group_id, description, amount, currency, 
-      paid_by, split_between, date, created_by, created_at, category
+      paid_by, split_between, date, created_by, created_at, category,
+      split_type, custom_splits
     )
     VALUES (
       ${id}, ${groupId}, ${description}, ${amount}, ${currency},
       ${paidBy}, ${JSON.stringify(splitBetween)}::jsonb, ${expenseDate.toISOString()}, 
-      ${createdBy}, NOW(), ${category || null}
+      ${createdBy}, NOW(), ${category || null},
+      ${splitType}, ${customSplits ? JSON.stringify(customSplits) : null}::jsonb
     )
     RETURNING *
   `;
@@ -513,6 +537,8 @@ export async function createExpense(
     createdBy: row.created_by,
     createdAt: new Date(row.created_at),
     category: row.category,
+    splitType: row.split_type || 'equal',
+    customSplits: row.custom_splits || undefined,
   };
 }
 
@@ -550,6 +576,8 @@ export async function getGroupExpenses(groupId: string, retryCount = 0): Promise
     createdBy: row.created_by,
     createdAt: new Date(row.created_at),
     category: row.category,
+    splitType: row.split_type || 'equal',
+    customSplits: row.custom_splits || undefined,
   }));
 }
 

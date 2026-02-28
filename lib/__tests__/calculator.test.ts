@@ -1,4 +1,4 @@
-import { calculateBalances, calculateSettlements, getGroupSummary } from '../calculator';
+import { calculateBalances, calculateSettlements, getGroupSummary, calculateExpenseShares } from '../calculator';
 import { Expense, User } from '@/types';
 
 describe('calculator', () => {
@@ -24,6 +24,7 @@ describe('calculator', () => {
           category: 'food',
           date: new Date(),
           createdAt: new Date(),
+          splitType: 'equal',
         },
       ];
 
@@ -54,6 +55,7 @@ describe('calculator', () => {
           category: 'food',
           date: new Date(),
           createdAt: new Date(),
+          splitType: 'equal',
         },
         {
           id: 'exp2',
@@ -67,6 +69,7 @@ describe('calculator', () => {
           category: 'transport',
           date: new Date(),
           createdAt: new Date(),
+          splitType: 'equal',
         },
       ];
 
@@ -96,6 +99,7 @@ describe('calculator', () => {
           category: 'food',
           date: new Date(),
           createdAt: new Date(),
+          splitType: 'equal',
         },
       ];
 
@@ -120,6 +124,7 @@ describe('calculator', () => {
           category: 'other',
           date: new Date(),
           createdAt: new Date(),
+          splitType: 'equal',
         },
       ];
 
@@ -211,6 +216,7 @@ describe('calculator', () => {
           category: 'food',
           date: new Date(),
           createdAt: new Date(),
+          splitType: 'equal',
         },
         {
           id: 'exp2',
@@ -224,6 +230,7 @@ describe('calculator', () => {
           category: 'transport',
           date: new Date(),
           createdAt: new Date(),
+          splitType: 'equal',
         },
       ];
 
@@ -242,6 +249,123 @@ describe('calculator', () => {
       expect(summary.expensesCount).toBe(0);
       expect(summary.balances).toHaveLength(3);
       expect(summary.settlements).toHaveLength(0);
+    });
+  });
+
+  describe('calculateExpenseShares (Custom Split)', () => {
+    it('должен правильно рассчитывать равное разделение (equal split)', () => {
+      const expense: Expense = {
+        id: 'exp1',
+        groupId: 'group1',
+        description: 'Пицца',
+        amount: 1500,
+        currency: 'RUB',
+        paidBy: 'user1',
+        createdBy: 'user1',
+        splitBetween: ['user1', 'user2', 'user3'],
+        splitType: 'equal',
+        category: 'food',
+        date: new Date(),
+        createdAt: new Date(),
+      };
+
+      const shares = calculateExpenseShares(expense);
+
+      expect(shares['user1']).toBe(500);
+      expect(shares['user2']).toBe(500);
+      expect(shares['user3']).toBe(500);
+    });
+
+    it('должен правильно рассчитывать неравномерное разделение (custom split)', () => {
+      const expense: Expense = {
+        id: 'exp1',
+        groupId: 'group1',
+        description: 'Пицца',
+        amount: 1500,
+        currency: 'RUB',
+        paidBy: 'user1',
+        createdBy: 'user1',
+        splitBetween: ['user1', 'user2', 'user3'],
+        splitType: 'custom',
+        customSplits: {
+          'user1': 2,  // 2 доли
+          'user2': 1,  // 1 доля
+          'user3': 1,  // 1 доля
+        },
+        category: 'food',
+        date: new Date(),
+        createdAt: new Date(),
+      };
+
+      const shares = calculateExpenseShares(expense);
+
+      // Всего 4 доли, цена доли = 1500/4 = 375
+      expect(shares['user1']).toBe(750);  // 2 × 375
+      expect(shares['user2']).toBe(375);  // 1 × 375
+      expect(shares['user3']).toBe(375);  // 1 × 375
+    });
+
+    it('должен правильно работать с разными соотношениями долей', () => {
+      const expense: Expense = {
+        id: 'exp1',
+        groupId: 'group1',
+        description: 'Ужин',
+        amount: 3000,
+        currency: 'RUB',
+        paidBy: 'user1',
+        createdBy: 'user1',
+        splitBetween: ['user1', 'user2'],
+        splitType: 'custom',
+        customSplits: {
+          'user1': 3,  // 3 доли (60%)
+          'user2': 2,  // 2 доли (40%)
+        },
+        category: 'food',
+        date: new Date(),
+        createdAt: new Date(),
+      };
+
+      const shares = calculateExpenseShares(expense);
+
+      // Всего 5 долей, цена доли = 3000/5 = 600
+      expect(shares['user1']).toBe(1800);  // 3 × 600
+      expect(shares['user2']).toBe(1200);  // 2 × 600
+    });
+
+    it('должен интегрироваться с calculateBalances для custom split', () => {
+      const expenses: Expense[] = [
+        {
+          id: 'exp1',
+          groupId: 'group1',
+          description: 'Пицца',
+          amount: 1500,
+          currency: 'RUB',
+          paidBy: 'user1',
+          createdBy: 'user1',
+          splitBetween: ['user1', 'user2', 'user3'],
+          splitType: 'custom',
+          customSplits: {
+            'user1': 2,  // Алиса съела 2 кусочка
+            'user2': 1,  // Боб съел 1
+            'user3': 1,  // Виктор съел 1
+          },
+          category: 'food',
+          date: new Date(),
+          createdAt: new Date(),
+        },
+      ];
+
+      const balances = calculateBalances(expenses, users);
+
+      // Алиса заплатила 1500, но должна только 750 (2/4)
+      // Итого: +750
+      expect(balances.find(b => b.userId === 'user1')?.balance).toBe(750);
+      
+      // Боб не платил, но должен 375 (1/4)
+      expect(balances.find(b => b.userId === 'user2')?.balance).toBe(-375);
+      
+      // Виктор не платил, но должен 375 (1/4)
+      expect(balances.find(b => b.userId === 'user3')?.balance).toBe(-375);
     });
   });
 });

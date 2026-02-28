@@ -2,9 +2,53 @@
 import { Expense, Balance, Settlement, User } from '@/types';
 
 /**
+ * Рассчитывает долю каждого участника в расходе
+ * Поддерживает как равное разделение, так и custom split (по долям)
+ */
+export function calculateExpenseShares(expense: Expense): Record<string, number> {
+  const { amount, splitBetween, splitType, customSplits } = expense;
+  const shares: Record<string, number> = {};
+  
+  if (splitType === 'equal') {
+    // Равное разделение (старое поведение)
+    const perPerson = amount / splitBetween.length;
+    splitBetween.forEach(userId => {
+      shares[userId] = perPerson;
+    });
+  } else if (splitType === 'custom' && customSplits) {
+    // Неравномерное разделение по долям
+    // Считаем общее количество долей
+    const totalShares = Object.values(customSplits).reduce((sum, count) => sum + count, 0);
+    
+    if (totalShares === 0) {
+      throw new Error('Total shares cannot be zero');
+    }
+    
+    // Цена одной доли
+    const pricePerShare = amount / totalShares;
+    
+    // Рассчитываем сумму для каждого участника
+    splitBetween.forEach(userId => {
+      const userShares = customSplits[userId] || 0;
+      shares[userId] = pricePerShare * userShares;
+    });
+  } else {
+    // Fallback на равное разделение если что-то пошло не так
+    const perPerson = amount / splitBetween.length;
+    splitBetween.forEach(userId => {
+      shares[userId] = perPerson;
+    });
+  }
+  
+  return shares;
+}
+
+/**
  * Рассчитывает балансы для каждого участника группы
  * Положительный баланс = вам должны
  * Отрицательный баланс = вы должны
+ * 
+ * Теперь поддерживает как равное разделение, так и custom split
  */
 export function calculateBalances(expenses: Expense[], members: User[]): Balance[] {
   const balances: { [userId: string]: number } = {};
@@ -16,15 +60,17 @@ export function calculateBalances(expenses: Expense[], members: User[]): Balance
   
   // Обрабатываем каждый расход
   expenses.forEach(expense => {
-    const { amount, paidBy, splitBetween } = expense;
-    const perPerson = amount / splitBetween.length;
+    const { amount, paidBy } = expense;
     
     // Кто заплатил - получает баланс +
     balances[paidBy] = (balances[paidBy] || 0) + amount;
     
+    // Рассчитываем долю каждого участника (с учётом типа разделения)
+    const shares = calculateExpenseShares(expense);
+    
     // Все участники разделения получают баланс -
-    splitBetween.forEach(userId => {
-      balances[userId] = (balances[userId] || 0) - perPerson;
+    Object.entries(shares).forEach(([userId, shareAmount]) => {
+      balances[userId] = (balances[userId] || 0) - shareAmount;
     });
   });
   

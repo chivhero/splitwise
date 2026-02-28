@@ -97,7 +97,14 @@ export default function ExpenseList({ expenses, group, onExpenseDeleted, onModal
             <div className="flex items-start gap-3">
               <div className="text-2xl">{getCategoryEmoji(expense.category)}</div>
               <div className="flex-1">
-                <h3 className="font-semibold mb-1 text-white">{expense.description}</h3>
+                <div className="flex items-center gap-2 mb-1">
+                  <h3 className="font-semibold text-white">{expense.description}</h3>
+                  {expense.splitType === 'custom' && (
+                    <span className="text-[10px] px-2 py-0.5 rounded-md bg-white/10 border border-white/20 text-white/70 font-medium">
+                      по долям
+                    </span>
+                  )}
+                </div>
                 <p className="text-sm text-white/70 mb-2">
                   {t('expenses.paidByName', { name: getUserName(expense.paidBy) })}
                 </p>

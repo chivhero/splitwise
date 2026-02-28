@@ -92,7 +92,19 @@
     "noItems": "No items yet",
     "comments": "Comments",
     "addCommentPlaceholder": "Write a comment...",
-    "noComments": "No comments yet"
+    "noComments": "No comments yet",
+    "splitTypeLabel": "How to split?",
+    "splitEqual": "Equal",
+    "splitCustom": "Custom",
+    "customSplitsLabel": "Specify shares for each:",
+    "resetShares": "Reset to 1",
+    "shares": "shares",
+    "share": "share",
+    "totalShares": "Total shares",
+    "pricePerShare": "Price per share",
+    "calculation": "Calculation",
+    "shareBreakdown": "Share Breakdown",
+    "customBadge": "custom"
   },
   "settlements": {
     "title": "Settlements",

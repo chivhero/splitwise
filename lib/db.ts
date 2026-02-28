@@ -277,6 +277,8 @@ export function createExpense(
     createdBy,
     createdAt: new Date(createdAt),
     category,
+    splitType: 'equal', // SQLite version doesn't support custom split
+    customSplits: undefined,
   };
 }
 
@@ -301,6 +303,8 @@ export function getGroupExpenses(groupId: string): Expense[] {
     createdBy: row.created_by,
     createdAt: new Date(row.created_at),
     category: row.category,
+    splitType: 'equal', // SQLite version doesn't support custom split
+    customSplits: undefined,
   }));
 }
 

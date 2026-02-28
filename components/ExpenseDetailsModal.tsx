@@ -2,11 +2,12 @@
 
 import { useState, useEffect } from 'react';
 import { Expense, Group, ExpenseItem, ExpenseComment } from '@/types';
-import { X, Edit2, Trash2, Plus, Check, MessageSquare } from 'lucide-react';
+import { X, Edit2, Trash2, Plus, Check, MessageSquare, Users } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { format } from 'date-fns';
 import { ru, enUS } from 'date-fns/locale';
 import { getTelegramUser } from '@/lib/telegram';
+import { calculateExpenseShares } from '@/lib/calculator';
 
 interface ExpenseDetailsModalProps {
   expense: Expense;
@@ -292,6 +293,42 @@ export default function ExpenseDetailsModal({
                 </button>
               )}
             </div>
+            
+            {/* Split Breakdown (for custom split) */}
+            {expense.splitType === 'custom' && expense.customSplits && (
+              <div className="mt-4 pt-4 border-t border-white/10">
+                <h4 className="text-sm font-medium text-white/70 mb-3 flex items-center gap-2">
+                  <Users size={16} />
+                  Распределение по долям
+                </h4>
+                <div className="space-y-2">
+                  {(() => {
+                    const shares = calculateExpenseShares(expense);
+                    const totalShares = Object.values(expense.customSplits).reduce((sum, s) => sum + s, 0);
+                    const pricePerShare = expense.amount / totalShares;
+                    
+                    return expense.splitBetween.map(userId => {
+                      const userShares = expense.customSplits![userId] || 0;
+                      const userAmount = shares[userId] || 0;
+                      
+                      return (
+                        <div key={userId} className="flex items-center justify-between text-sm">
+                          <span className="text-white/80">{getUserName(userId)}</span>
+                          <div className="flex items-center gap-2">
+                            <span className="text-white/50 text-xs">
+                              {userShares} × {pricePerShare.toFixed(2)}
+                            </span>
+                            <span className="text-white font-medium">
+                              {userAmount.toFixed(2)} {expense.currency}
+                            </span>
+                          </div>
+                        </div>
+                      );
+                    });
+                  })()}
+                </div>
+              </div>
+            )}
           </div>
         </div>
 

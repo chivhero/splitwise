@@ -32,7 +32,9 @@ export async function POST(
       splitBetweenTelegramIds, 
       telegramId, 
       category, 
-      date 
+      date,
+      splitType,
+      customSplits
     } = body;
 
     console.log('[API /expenses] Request:', { 
@@ -129,8 +131,36 @@ export async function POST(
 
     console.log('[API /expenses] Creating expense:', {
       paidBy: paidByUser.id,
-      splitBetween: finalSplitBetweenUserIds
+      splitBetween: finalSplitBetweenUserIds,
+      splitType: splitType || 'equal',
+      customSplits: customSplits || null
     });
+
+    // Validation for custom split
+    if (splitType === 'custom') {
+      if (!customSplits || typeof customSplits !== 'object') {
+        return NextResponse.json(
+          { error: 'customSplits required when splitType is "custom"' },
+          { status: 400 }
+        );
+      }
+      
+      // Validate all participants have shares
+      for (const userId of finalSplitBetweenUserIds) {
+        if (!(userId in customSplits)) {
+          return NextResponse.json(
+            { error: `Missing share for user ${userId} in customSplits` },
+            { status: 400 }
+          );
+        }
+        if (typeof customSplits[userId] !== 'number' || customSplits[userId] < 1) {
+          return NextResponse.json(
+            { error: `Invalid share for user ${userId}: must be a number >= 1` },
+            { status: 400 }
+          );
+        }
+      }
+    }
 
     const expense = await createExpense(
       params.groupId,
@@ -141,7 +171,9 @@ export async function POST(
       user.id,
       group.currency,
       category,
-      date ? new Date(date) : undefined
+      date ? new Date(date) : undefined,
+      splitType || 'equal',
+      customSplits || undefined
     );
 
     console.log('[API /expenses] Expense created:', expense.id);

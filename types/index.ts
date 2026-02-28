@@ -51,6 +51,8 @@ export interface Expense {
   createdBy: string;
   createdAt: Date;
   category?: string;
+  splitType: 'equal' | 'custom'; // How to split the expense
+  customSplits?: Record<string, number>; // user_id → number of shares (only for custom split)
 }
 
 export interface Settlement {
