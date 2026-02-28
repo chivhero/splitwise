@@ -6,7 +6,7 @@
  */
 
 const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://t.me/SplitWisedbot';
+const BOT_USERNAME = process.env.NEXT_PUBLIC_TELEGRAM_BOT_USERNAME || 'SplitWisedbot';
 const BOT_API_BASE = `https://api.telegram.org/bot${BOT_TOKEN}`;
 
 // ─── Message Variations ───────────────────────────────────────────────────────
@@ -102,7 +102,7 @@ export async function sendBotMessage(
         [
           {
             text: buttonText,
-            web_app: { url: APP_URL },
+            url: `https://t.me/${BOT_USERNAME}`,
           },
         ],
       ],
